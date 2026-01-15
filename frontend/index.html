@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PCB Marketplace Armenia - Find PCB & SMT Manufacturers</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" id="header">
+        <!-- Динамически загружается из components/header.html -->
+    </header>
+
+    <!-- Auth Modal (скрыта по умолчанию) -->
+    <div id="auth-modal" class="modal">
+        <!-- Загружается из components/modals.html -->
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="container">
+                <div class="hero-content">
+                    <h1 class="hero-title">PCB & SMT Manufacturing Marketplace</h1>
+                    <p class="hero-subtitle">Connect with trusted PCB manufacturers and SMT assembly lines in Armenia. From prototype to production.</p>
+                    
+                    <div class="hero-buttons">
+                        <button class="btn btn-primary btn-lg" onclick="showAuthModal('register')">
+                            <i class="fas fa-rocket"></i> Start Your Order
+                        </button>
+                        <button class="btn btn-outline btn-lg" onclick="scrollToFeatures()">
+                            <i class="fas fa-industry"></i> For Manufacturers
+                        </button>
+                    </div>
+                    
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <span class="stat-number" id="active-orders">0</span>
+                            <span class="stat-label">Active Orders</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="registered-factories">0</span>
+                            <span class="stat-label">Registered Factories</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="completed-projects">0</span>
+                            <span class="stat-label">Completed Projects</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features-section">
+            <div class="container">
+                <h2 class="section-title">How It Works</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-upload"></i>
+                        </div>
+                        <h3>Upload Your Design</h3>
+                        <p>Upload Gerber, BOM, Pick & Place files. Our system validates your design automatically.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3>Find Manufacturers</h3>
+                        <p>Our platform matches your requirements with qualified PCB/SMT factories in Armenia.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
+                        <h3>Receive Quotes</h3>
+                        <p>Get competitive quotes with lead times from multiple manufacturers.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-truck-fast"></i>
+                        </div>
+                        <h3>Production & Delivery</h3>
+                        <p>Track production progress in real-time and receive your boards on time.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Order Types -->
+        <section class="order-types-section">
+            <div class="container">
+                <h2 class="section-title">Manufacturing Services</h2>
+                <div class="services-grid">
+                    <div class="service-card pcb-service">
+                        <div class="service-header">
+                            <i class="fas fa-microchip"></i>
+                            <h3>PCB Fabrication</h3>
+                        </div>
+                        <ul class="service-features">
+                            <li><i class="fas fa-check"></i> 1-32 Layer PCBs</li>
+                            <li><i class="fas fa-check"></i> FR-4, Rogers, Aluminum</li>
+                            <li><i class="fas fa-check"></i> HDI & Impedance Control</li>
+                            <li><i class="fas fa-check"></i> ENIG, HASL, Immersion Silver</li>
+                        </ul>
+                        <button class="btn btn-outline" onclick="createOrder('pcb')">
+                            Order PCB Only
+                        </button>
+                    </div>
+                    
+                    <div class="service-card smt-service">
+                        <div class="service-header">
+                            <i class="fas fa-robot"></i>
+                            <h3>SMT Assembly</h3>
+                        </div>
+                        <ul class="service-features">
+                            <li><i class="fas fa-check"></i> Full Turnkey Assembly</li>
+                            <li><i class="fas fa-check"></i> BGA, QFN, 0201 Components</li>
+                            <li><i class="fas fa-check"></i> AOI & X-Ray Inspection</li>
+                            <li><i class="fas fa-check"></i> Functional Testing</li>
+                        </ul>
+                        <button class="btn btn-outline" onclick="createOrder('smt')">
+                            Order PCB + SMT
+                        </button>
+                    </div>
+                    
+                    <div class="service-card dfm-service">
+                        <div class="service-header">
+                            <i class="fas fa-tools"></i>
+                            <h3>DFM Optimization</h3>
+                        </div>
+                        <ul class="service-features">
+                            <li><i class="fas fa-check"></i> Design for Manufacturing</li>
+                            <li><i class="fas fa-check"></i> Cost Reduction Analysis</li>
+                            <li><i class="fas fa-check"></i> Yield Improvement</li>
+                            <li><i class="fas fa-check"></i> Expert Consultation</li>
+                        </ul>
+                        <button class="btn btn-outline" onclick="requestDFM()">
+                            Request DFM Review
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Section (показывается только авторизованным) -->
+        <section class="dashboard-section" id="dashboard-section" style="display: none;">
+            <div class="container">
+                <div class="dashboard-header">
+                    <h2 class="section-title">Your Dashboard</h2>
+                    <div class="dashboard-actions">
+                        <button class="btn btn-primary" onclick="showCreateOrderModal()">
+                            <i class="fas fa-plus"></i> New Order
+                        </button>
+                        <button class="btn btn-outline" onclick="refreshOrders()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Табы -->
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('my-orders')">
+                        <i class="fas fa-list"></i> My Orders
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('available-orders')">
+                        <i class="fas fa-industry"></i> Available Orders
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('messages')">
+                        <i class="fas fa-envelope"></i> Messages
+                        <span class="badge" id="message-count">0</span>
+                    </button>
+                </div>
+                
+                <!-- Контент табов -->
+                <div class="tab-content" id="my-orders">
+                    <div class="orders-container" id="orders-container">
+                        <!-- Заказы загружаются динамически -->
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="available-orders" style="display: none;">
+                    <div class="filters">
+                        <select id="order-filter" class="filter-select">
+                            <option value="all">All Orders</option>
+                            <option value="pcb">PCB Only</option>
+                            <option value="smt">PCB + SMT</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                        <input type="text" id="search-orders" class="search-input" placeholder="Search orders...">
+                    </div>
+                    <div class="orders-container" id="available-orders-container">
+                        <!-- Доступные заказы загружаются динамически -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" id="footer">
+        <!-- Загружается из components/footer.html -->
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/orders.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+    
+    <script>
+        // Загрузка компонентов
+        window.addEventListener('DOMContentLoaded', () => {
+            loadComponent('header', '#header');
+            loadComponent('footer', '#footer');
+            loadComponent('auth-modal', '#auth-modal');
+            loadComponent('create-order-modal', '#create-order-modal', false);
+            
+            // Проверка авторизации
+            checkAuth();
+            
+            // Загрузка статистики
+            loadStats();
+        });
+    </script>
+</body>
+</html>
