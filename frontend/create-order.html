@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Order - PCB Marketplace</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2563eb;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        label.required::after {
+            content: " *";
+            color: #ef4444;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #2563eb;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .checkbox-group input {
+            width: auto;
+        }
+        .auth-info {
+            background: #fef3c7;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .order-details {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f1f5f9;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📦 Create PCB Order</h1>
+        
+        <div class="auth-info" id="authInfo">
+            <strong>Authentication Status:</strong>
+            <span id="authStatus">Checking...</span>
+        </div>
+        
+        <form id="orderForm">
+            <div class="form-group">
+                <label for="title" class="required">Order Title:</label>
+                <input type="text" id="title" required 
+                       placeholder="e.g., Arduino-Compatible PCB Board">
+            </div>
+            
+            <div class="form-group">
+                <label for="description" class="required">Description:</label>
+                <textarea id="description" required 
+                          placeholder="Describe your PCB project, requirements, special instructions..."></textarea>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="pcb_quantity" class="required">Quantity:</label>
+                    <input type="number" id="pcb_quantity" min="1" value="10" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="layer_count" class="required">Layers:</label>
+                    <select id="layer_count" required>
+                        <option value="1">1 Layer</option>
+                        <option value="2" selected>2 Layers</option>
+                        <option value="4">4 Layers</option>
+                        <option value="6">6 Layers</option>
+                        <option value="8">8 Layers</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="pcb_width" class="required">Width (mm):</label>
+                    <input type="number" id="pcb_width" min="1" value="100" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="pcb_height" class="required">Height (mm):</label>
+                    <input type="number" id="pcb_height" min="1" value="80" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="material" class="required">Material:</label>
+                <select id="material" required>
+                    <option value="FR-4" selected>FR-4</option>
+                    <option value="Rogers">Rogers</option>
+                    <option value="Aluminum">Aluminum</option>
+                    <option value="Flex">Flex PCB</option>
+                </select>
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="smt_required">
+                <label for="smt_required">SMT Assembly Required</label>
+            </div>
+            
+            <div id="smtFields" style="display: none;">
+                <div class="form-group">
+                    <label for="components_qty">Number of Components:</label>
+                    <input type="number" id="components_qty" min="0" value="50">
+                </div>
+            </div>
+            
+            <button type="submit">Create Order</button>
+        </form>
+        
+        <div id="message" class="message"></div>
+        
+        <div id="orderDetails" class="order-details">
+            <h3>Order Created Successfully!</h3>
+            <p><strong>Order ID:</strong> <span id="orderId"></span></p>
+            <p><strong>Status:</strong> <span id="orderStatus"></span></p>
+            <p><a href="#" id="uploadLink">Upload Gerber/BOM files for this order →</a></p>
+        </div>
+        
+        <a href="/static/index.html" class="back-link">← Back to API Testing</a>
+        <a href="/static/upload-file.html" class="back-link">Upload Files →</a>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api/v1';
+        
+        // Check authentication
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            const authInfo = document.getElementById('authInfo');
+            const authStatus = document.getElementById('authStatus');
+            
+            if (token && user) {
+                try {
+                    const userData = JSON.parse(user);
+                    authStatus.innerHTML = `✅ Logged in as <strong>${userData.email}</strong> (${userData.role})`;
+                    authInfo.style.background = '#d1fae5';
+                    authInfo.style.color = '#065f46';
+                    authInfo.style.border = '1px solid #a7f3d0';
+                    return token;
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                }
+            }
+            
+            authStatus.innerHTML = '❌ Not logged in. <a href="/static/login.html" style="color: #2563eb;">Login first</a>';
+            authInfo.style.background = '#fee2e2';
+            authInfo.style.color = '#dc2626';
+            authInfo.style.border = '1px solid #fecaca';
+            return null;
+        }
+        
+        // Toggle SMT fields
+        document.getElementById('smt_required').addEventListener('change', function() {
+            document.getElementById('smtFields').style.display = this.checked ? 'block' : 'none';
+        });
+        
+        // Form submission
+        document.getElementById('orderForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const token = checkAuth();
+            if (!token) {
+                alert('Please login first!');
+                window.location.href = '/static/login.html';
+                return;
+            }
+            
+            const formData = {
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                pcb_quantity: parseInt(document.getElementById('pcb_quantity').value),
+                pcb_width: parseInt(document.getElementById('pcb_width').value),
+                pcb_height: parseInt(document.getElementById('pcb_height').value),
+                layer_count: parseInt(document.getElementById('layer_count').value),
+                material: document.getElementById('material').value,
+                smt_required: document.getElementById('smt_required').checked,
+                components_qty: document.getElementById('smt_required').checked ? 
+                    parseInt(document.getElementById('components_qty').value) : 0
+            };
+            
+            const messageDiv = document.getElementById('message');
+            
+            // Clear previous message
+            messageDiv.style.display = 'none';
+            messageDiv.textContent = '';
+            messageDiv.className = 'message';
+            
+            try {
+                const response = await fetch(API_BASE + '/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok || response.status === 201) {
+                    document.getElementById('orderId').textContent = data.id;
+                    document.getElementById('orderStatus').textContent = data.status;
+                    document.getElementById('uploadLink').href = `/static/upload-file.html?order_id=${data.id}`;
+                    document.getElementById('orderDetails').style.display = 'block';
+                    
+                    document.getElementById('orderDetails').scrollIntoView({ behavior: 'smooth' });
+                    
+                } else {
+                    throw new Error(data.error || 'Failed to create order');
+                }
+                
+            } catch (error) {
+                messageDiv.textContent = '❌ Error: ' + error.message;
+                messageDiv.className = 'message error';
+                messageDiv.style.display = 'block';
+            }
+        });
+        
+        // Check auth on load
+        window.onload = function() {
+            checkAuth();
+        };
+    </script>
+</body>
+</html>

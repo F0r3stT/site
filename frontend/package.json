@@ -1,8 +1,20 @@
 {
   "name": "pcb-marketplace-frontend",
   "version": "1.0.0",
+  "description": "PCB Marketplace Frontend",
+  "main": "index.html",
   "scripts": {
-    "start": "npx serve . -p 8000",
-    "dev": "npx live-server . --port=8000"
-  }
+    "start": "live-server --port=3001 --proxy=/api:http://localhost:3000/api/v1",
+    "dev": "live-server --port=3001 --proxy=/api:http://localhost:3000/api/v1 --watch=.",
+    "serve": "http-server -p 3001 -c-1",
+    "dev-simple": "http-server -p 3001 --proxy http://localhost:3000?",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "live-server": "^1.2.2",
+    "http-server": "^14.1.1"
+  },
+  "author": "Your Name",
+  "license": "MIT"
 }
