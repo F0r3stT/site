@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PCB Marketplace Armenia - Find PCB & SMT Manufacturers</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" id="header">
+        <nav class="header-content">
+            <a href="/" class="logo">
+                <i class="fas fa-microchip"></i>
+                <span>CircuitWorks</span>
+            </a>
+            
+            <div class="nav-links">
+                <a href="#features" class="nav-link">How It Works</a>
+                <a href="#services" class="nav-link">Services</a>
+                <!--<a href="#production" class="nav-link">Our Production</a>
+                <a href="#quality" class="nav-link">Quality</a>-->
+                <a href="#factories" class="nav-link">Factories</a>
+                <a href="#pricing" class="nav-link">Pricing</a>
+                
+                <div class="user-menu" id="user-menu" style="display: none;">
+                    <div class="user-info">
+                        <div class="avatar" id="avatar-text">U</div>
+                        <div class="user-details">
+                            <span class="user-name" id="user-name"></span>
+                            <span class="user-role" id="user-role"></span>
+                        </div>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-outline btn-sm" onclick="toggleDropdown(this)">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-content">
+                            <a href="#profile" onclick="viewProfile()">
+                                <i class="fas fa-user"></i> Profile
+                            </a>
+                            <a href="#settings" onclick="viewSettings()">
+                                <i class="fas fa-cog"></i> Settings
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="#logout" onclick="logout()">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="auth-buttons" id="auth-buttons">
+                    <button class="btn btn-outline" onclick="goToLoginPage()">
+                        Sign in
+                    </button>
+                    <button class="btn btn-primary" onclick="goToRegisterPage()">
+                        Sign Up
+                    </button>
+                </div>
+                                <!-- Новый переключатель темы в правом верхнем углу -->
+            <button class="theme-toggle-auth" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
+            </div>
+            
+
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+        <!-- HERO SECTION -->
+        <section class="hero" id="hero">
+            <div class="hero_frame">
+                <div class="hero__inner">
+                    <div class="hero__content">
+                        <h1>
+                            PCB & SMT Manufacturing Marketplace
+                        </h1>
+                        <p>
+                            Connect with trusted PCB manufacturers and SMT assembly
+                            lines in Armenia. From prototype to production.
+                        </p>
+        
+                        <div class="hero__actions">
+                            <a href="register.html" class="btn btn--primary">Start Your Order</a>
+                            <a href="#" class="btn btn--secondary">For Manufacturers</a>
+                        </div>
+                    </div>
+                    <div class="hero__visual">
+                        <img src="resources/PCBFR.png" alt="Manufacturing illustration">
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Features Section -->
+        <section class="features-section" id="features">
+            <div class="container">
+                <h2 class="section-title">How It Works</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-upload"></i>
+                        </div>
+                        <h3>Upload Your Design</h3>
+                        <p>Upload Gerber, BOM, Pick & Place files. Our system validates your design automatically.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3>Find Manufacturers</h3>
+                        <p>Our platform matches your requirements with qualified PCB/SMT factories in Armenia.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
+                        <h3>Receive Quotes</h3>
+                        <p>Get competitive quotes with lead times from multiple manufacturers.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-truck-fast"></i>
+                        </div>
+                        <h3>Production & Delivery</h3>
+                        <p>Track production progress in real-time and receive your boards on time.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- New Production Section 1 (Image Left, Text Right) -->
+        <section class="production-section image-left" id="production">
+            <div class="container">
+                <div class="production-content">
+                    <div class="production-image">
+                        <img src="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2070&auto=format&fit=crop" alt="PCB Manufacturing Process">
+                        <div class="image-fade"></div>
+                    </div>
+                    <div class="production-text">
+                        <h2 class="section-title">Advanced PCB Manufacturing</h2>
+                        <div class="production-details">
+                            <div class="production-feature">
+                                <i class="fas fa-layer-group"></i>
+                                <div>
+                                    <h3>Multi-Layer Technology</h3>
+                                    <p>From 2 to 32 layers with precise layer alignment and impedance control.</p>
+                                </div>
+                            </div>
+                            <div class="production-feature">
+                                <i class="fas fa-bolt"></i>
+                                <div>
+                                    <h3>High-Speed Design</h3>
+                                    <p>Specialized in RF and high-frequency boards with controlled impedance.</p>
+                                </div>
+                            </div>
+                            <div class="production-feature">
+                                <i class="fas fa-industry"></i>
+                                <div>
+                                    <h3>Automated Production</h3>
+                                    <p>State-of-the-art automated lines ensuring consistency and quality.</p>
+                                </div>
+                            </div>
+                            <div class="production-feature">
+                                <i class="fas fa-leaf"></i>
+                                <div>
+                                    <h3>Eco-Friendly Processes</h3>
+                                    <p>Environmentally conscious manufacturing with reduced chemical usage.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="goToRegisterPage()">
+                            Start Manufacturing
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Order Types Section -->
+        <section class="order-types-section" id="services">
+            <div class="container">
+                <h2 class="section-title">Manufacturing Services</h2>
+                <div class="services-grid">
+                    <div class="service-card pcb-service">
+                        <div class="service-header">
+                            <i class="fas fa-microchip"></i>
+                            <h3>PCB Fabrication</h3>
+                        </div>
+                        <ul class="service-features">
+                            <li><i class="fas fa-check"></i> 1-32 Layer PCBs</li>
+                            <li><i class="fas fa-check"></i> FR-4, Rogers, Aluminum</li>
+                            <li><i class="fas fa-check"></i> HDI & Impedance Control</li>
+                            <li><i class="fas fa-check"></i> ENIG, HASL, Immersion Silver</li>
+                        </ul>
+                        <button class="btn btn-outline" onclick="createOrder('pcb')">
+                            Order PCB Only
+                        </button>
+                    </div>
+                    
+                    <div class="service-card smt-service">
+                        <div class="service-header">
+                            <i class="fas fa-robot"></i>
+                            <h3>SMT Assembly</h3>
+                        </div>
+                        <ul class="service-features">
+                            <li><i class="fas fa-check"></i> Full Turnkey Assembly</li>
+                            <li><i class="fas fa-check"></i> BGA, QFN, 0201 Components</li>
+                            <li><i class="fas fa-check"></i> AOI & X-Ray Inspection</li>
+                            <li><i class="fas fa-check"></i> Functional Testing</li>
+                        </ul>
+                        <button class="btn btn-outline" onclick="createOrder('smt')">
+                            Order PCB + SMT
+                        </button>
+                    </div>
+                    
+                    <div class="service-card dfm-service">
+                        <div class="service-header">
+                            <i class="fas fa-tools"></i>
+                            <h3>DFM Optimization</h3>
+                        </div>
+                        <ul class="service-features">
+                            <li><i class="fas fa-check"></i> Design for Manufacturing</li>
+                            <li><i class="fas fa-check"></i> Cost Reduction Analysis</li>
+                            <li><i class="fas fa-check"></i> Yield Improvement</li>
+                            <li><i class="fas fa-check"></i> Expert Consultation</li>
+                        </ul>
+                        <button class="btn btn-outline" onclick="requestDFM()">
+                            Request DFM Review
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- New Production Section 2 (Image Right, Text Left) -->
+        <section class="production-section image-right" id="quality">
+            <div class="container">
+                <div class="production-content">
+                    <div class="production-text">
+                        <h2 class="section-title">Quality Assurance & Testing</h2>
+                        <div class="quality-metrics">
+                            <div class="metric">
+                                <div class="metric-value">99.8%</div>
+                                <div class="metric-label">First-Pass Yield</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">100%</div>
+                                <div class="metric-label">AOI Inspection</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">24/7</div>
+                                <div class="metric-label">Process Monitoring</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">IPC-A-610</div>
+                                <div class="metric-label">Quality Standard</div>
+                            </div>
+                        </div>
+                        <div class="quality-features">
+                            <div class="quality-feature">
+                                <i class="fas fa-search"></i>
+                                <h3>Automated Optical Inspection</h3>
+                                <p>High-resolution AOI systems detect even the smallest defects.</p>
+                            </div>
+                            <div class="quality-feature">
+                                <i class="fas fa-x-ray"></i>
+                                <h3>X-Ray Inspection</h3>
+                                <p>For BGA and hidden solder joints, ensuring perfect connections.</p>
+                            </div>
+                            <div class="quality-feature">
+                                <i class="fas fa-vial"></i>
+                                <h3>Material Testing</h3>
+                                <p>Regular testing of raw materials to ensure consistency.</p>
+                            </div>
+                            <div class="quality-feature">
+                                <i class="fas fa-chart-line"></i>
+                                <h3>Statistical Process Control</h3>
+                                <p>Real-time monitoring and control of all manufacturing parameters.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="production-image">
+                        <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=2074&auto=format&fit=crop" alt="Quality Inspection">
+                        <div class="image-fade"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Section (показывается только авторизованным) -->
+        <section class="dashboard-section" id="dashboard-section" style="display: none;">
+            <div class="container">
+                <div class="dashboard-header">
+                    <h2 class="section-title">Your Dashboard</h2>
+                    <div class="dashboard-actions">
+                        <button class="btn btn-primary" onclick="showCreateOrderModal()">
+                            <i class="fas fa-plus"></i> New Order
+                        </button>
+                        <button class="btn btn-outline" onclick="refreshOrders()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Табы -->
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('my-orders')">
+                        <i class="fas fa-list"></i> My Orders
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('available-orders')">
+                        <i class="fas fa-industry"></i> Available Orders
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('messages')">
+                        <i class="fas fa-envelope"></i> Messages
+                        <span class="badge" id="message-count">0</span>
+                    </button>
+                </div>
+                
+                <!-- Контент табов -->
+                <div class="tab-content" id="my-orders">
+                    <div class="orders-container" id="orders-container">
+                        <!-- Заказы загружаются динамически -->
+                        <div class="order-card">
+                            <div class="order-header">
+                                <h3 class="order-title">RF Board Prototype</h3>
+                                <span class="order-status status-in_production">In Production</span>
+                            </div>
+                            <div class="order-meta">
+                                <span class="order-tag"><i class="fas fa-layer-group"></i> 4 Layers</span>
+                                <span class="order-tag"><i class="fas fa-ruler-combined"></i> 100x80mm</span>
+                                <span class="order-tag"><i class="fas fa-industry"></i> 5 units</span>
+                            </div>
+                            <p>High frequency RF board for communication device prototype.</p>
+                            <div class="order-actions">
+                                <button class="btn btn-outline btn-sm"><i class="fas fa-eye"></i> View</button>
+                                <button class="btn btn-outline btn-sm"><i class="fas fa-download"></i> Files</button>
+                            </div>
+                        </div>
+                        
+                        <div class="order-card">
+                            <div class="order-header">
+                                <h3 class="order-title">Power Management Board</h3>
+                                <span class="order-status status-completed">Completed</span>
+                            </div>
+                            <div class="order-meta">
+                                <span class="order-tag"><i class="fas fa-layer-group"></i> 2 Layers</span>
+                                <span class="order-tag"><i class="fas fa-ruler-combined"></i> 60x40mm</span>
+                                <span class="order-tag"><i class="fas fa-industry"></i> 50 units</span>
+                            </div>
+                            <p>Power management circuit for IoT device with battery charging.</p>
+                            <div class="order-actions">
+                                <button class="btn btn-outline btn-sm"><i class="fas fa-eye"></i> View</button>
+                                <button class="btn btn-outline btn-sm"><i class="fas fa-file-invoice"></i> Invoice</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="available-orders" style="display: none;">
+                    <div class="filters">
+                        <select id="order-filter" class="filter-select">
+                            <option value="all">All Orders</option>
+                            <option value="pcb">PCB Only</option>
+                            <option value="smt">PCB + SMT</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                        <input type="text" id="search-orders" class="search-input" placeholder="Search orders...">
+                    </div>
+                    <div class="orders-container" id="available-orders-container">
+                        <!-- Доступные заказы загружаются динамически -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" id="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>CircuitWorks</h3>
+                    <p>Connecting innovators with manufacturers in Armenia's electronics industry.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Services</h3>
+                    <ul class="footer-links">
+                        <li><a href="#services">PCB Fabrication</a></li>
+                        <li><a href="#services">SMT Assembly</a></li>
+                        <li><a href="#services">DFM Analysis</a></li>
+                        <li><a href="#quality">Quality Testing</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Company</h3>
+                    <ul class="footer-links">
+                        <li><a href="#production">Our Production</a></li>
+                        <li><a href="#factories">Factories</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Support</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">File Guidelines</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 CircuitWorks. All rights reserved. Connecting Armenian electronics manufacturing.</p>
+            </div>
+        </div>
+    </footer>
+
+    <style>
+        /* === ДОПОЛНИТЕЛЬНЫЕ СТИЛИ ДЛЯ НОВЫХ СЕКЦИЙ === */
+        
+        /* Переключатель темы в стиле страницы регистрации */
+        .theme-toggle-auth {
+            position: static;
+            top: 1.5rem;
+            right: 2rem;
+            background: var(--bg-hover);
+            border: 1px solid var(--border-soft);
+            border-radius: 50%;
+            margin-left: 1rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-main);
+            transition: var(--transition-smooth);
+            z-index: 1001;
+        }
+        
+        .theme-toggle-auth:hover {
+            transform: translateY(-2px) rotate(15deg);
+            box-shadow: var(--shadow-sm);
+            border-color: var(--primary);
+        }
+        
+        /* Новые секции производства */
+        .production-section {
+            padding: 8rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .production-section.image-left {
+            background: var(--bg-section-a);
+        }
+        
+        .production-section.image-right {
+            background: var(--bg-section-b);
+        }
+        
+        .production-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+        
+        .image-left .production-content {
+            direction: ltr;
+        }
+        
+        .image-right .production-content {
+            direction: rtl;
+        }
+        
+        .image-right .production-text {
+            direction: ltr;
+        }
+        
+        .production-image {
+            position: relative;
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+            height: 600px;
+        }
+        
+        .production-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .image-fade {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 150px;
+            background: linear-gradient(to top, var(--bg-section-a), transparent);
+            pointer-events: none;
+        }
+        
+        .image-right .image-fade {
+            background: linear-gradient(to top, var(--bg-section-b), transparent);
+        }
+        
+        .production-text {
+            padding: 2rem;
+        }
+        
+        .production-text .section-title {
+            text-align: left;
+            margin-bottom: 2rem;
+        }
+        
+        .image-right .production-text .section-title {
+            text-align: right;
+        }
+        
+        .production-details {
+            margin-bottom: 3rem;
+        }
+        
+        .production-feature {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-soft);
+            transition: var(--transition-smooth);
+        }
+        
+        .production-feature:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+        }
+        
+        .production-feature i {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-top: 0.25rem;
+        }
+        
+        .production-feature h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .production-feature p {
+            font-size: 1rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+        
+        /* Качественные метрики */
+        .quality-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .metric {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-soft);
+            transition: var(--transition-smooth);
+        }
+        
+        .metric:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .metric-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        
+        /* Особенности качества */
+        .quality-features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .quality-feature {
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-soft);
+            transition: var(--transition-smooth);
+        }
+        
+        .quality-feature:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .quality-feature i {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .quality-feature h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .quality-feature p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+        
+        /* Плавная прокрутка для навигации */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Адаптивность для новых секций */
+        @media (max-width: 1024px) {
+            .production-content {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+            
+            .production-image {
+                height: 400px;
+            }
+            
+            .production-text .section-title,
+            .image-right .production-text .section-title {
+                text-align: center;
+            }
+            
+            .quality-metrics,
+            .quality-features {
+                grid-template-columns: 1fr;
+            }
+            
+            .production-feature {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .theme-toggle-auth {
+                top: 1rem;
+                right: 1rem;
+                width: 2.2rem;
+                height: 2.2rem;
+            }
+            
+            .production-image {
+                height: 300px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .production-section {
+                padding: 4rem 0;
+            }
+            
+            .production-image {
+                height: 250px;
+            }
+            
+            .metric-value {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+
+    <script>
+        // Переключение темы (новая версия с кружком)
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = themeToggle.querySelector('i');
+        
+        themeToggle.addEventListener('click', () => {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            html.setAttribute('data-theme', newTheme);
+            themeIcon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            
+            // Сохраняем в localStorage
+            localStorage.setItem('theme', newTheme);
+            
+            // Анимация переключения
+            themeToggle.style.transform = 'rotate(360deg)';
+            setTimeout(() => {
+                themeToggle.style.transform = '';
+            }, 300);
+        });
+        
+        // Проверка сохраненной темы
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            themeIcon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            
+            // Показ/скрытие дашборда (имитация авторизации)
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            if (isLoggedIn) {
+                document.getElementById('dashboard-section').style.display = 'block';
+                document.getElementById('user-menu').style.display = 'flex';
+                document.getElementById('auth-buttons').style.display = 'none';
+            }
+            
+            // Анимация при скролле для хедера
+            window.addEventListener('scroll', () => {
+                const header = document.querySelector('.header');
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+            
+            // Анимация карточек при прокрутке
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+            
+            // Наблюдаем за карточками features и производства
+            document.querySelectorAll('.feature-card, .service-card, .production-feature, .quality-feature, .metric').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(card);
+            });
+            
+            // Плавная прокрутка для навигационных ссылок
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    if (targetId.startsWith('#')) {
+                        const targetElement = document.querySelector(targetId);
+                        if (targetElement) {
+                            window.scrollTo({
+                                top: targetElement.offsetTop - 80,
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                });
+            });
+        });
+        
+        // Переключение табов в дашборде
+        function switchTab(tabId) {
+            // Убираем активный класс со всех табов
+            document.querySelectorAll('.tab-btn').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Скрываем все контенты табов
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Активируем выбранный таб
+            document.querySelector(`.tab-btn[onclick*="${tabId}"]`).classList.add('active');
+            document.getElementById(tabId).style.display = 'block';
+        }
+        
+        // Переход на страницу логина
+        function goToLoginPage() {
+            window.location.href = 'login.html';
+        }
+        
+        function goToRegisterPage() {
+            window.location.href = 'register.html';
+        }
+        
+        // Создание заказа
+        function createOrder(type) {
+            alert(`Starting ${type.toUpperCase()} order process...`);
+            // В реальном приложении здесь будет переход на страницу создания заказа
+        }
+        
+        // Запрос DFM анализа
+        function requestDFM() {
+            alert('Requesting DFM analysis...');
+            // В реальном приложении здесь будет модальное окно для загрузки файлов
+        }
+        
+        // Управление выпадающим меню
+        function toggleDropdown(button) {
+            const dropdown = button.nextElementSibling;
+            const isVisible = dropdown.style.display === 'block';
+            
+            // Закрываем все выпадающие меню
+            document.querySelectorAll('.dropdown-content').forEach(d => {
+                d.style.display = 'none';
+            });
+            
+            // Открываем текущее, если было закрыто
+            if (!isVisible) {
+                dropdown.style.display = 'block';
+            }
+        }
+        
+        // Закрытие выпадающих меню при клике вне
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.dropdown')) {
+                document.querySelectorAll('.dropdown-content').forEach(dropdown => {
+                    dropdown.style.display = 'none';
+                });
+            }
+        });
+        
+        // Функции пользователя (заглушки)
+        function viewProfile() {
+            alert('Profile page would open here');
+        }
+        
+        function viewSettings() {
+            alert('Settings page would open here');
+        }
+        
+        function logout() {
+            localStorage.setItem('isLoggedIn', 'false');
+            alert('Logged out successfully');
+            window.location.reload();
+        }
+        
+        // Показать модальное окно создания заказа (заглушка)
+        function showCreateOrderModal() {
+            alert('Create Order modal would open here');
+        }
+        
+        // Обновить заказы (заглушка)
+        function refreshOrders() {
+            alert('Refreshing orders...');
+        }
+    </script>
+</body>
+</html>

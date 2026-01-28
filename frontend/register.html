@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - PCB Manufacturing Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+    <!-- Переключатель темы -->
+    <button class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <div class="auth-page">
+        <!-- Левая часть с изображением -->
+        <div class="image-section">
+            <div class="image-container">
+                <img src="resources/PCBFABR.jpg" alt="PCB Manufacturing Process">
+                <div class="image-overlay"></div>
+                <div class="image-caption">
+                    <h3>Advanced PCB Manufacturing</h3>
+                    <p>Connect with manufacturers and streamline your electronics production with our secure platform.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Правая часть с формой -->
+        <div class="form-section">
+            <div class="form-container">
+                <div class="auth-header">
+                    <h1 class="auth-title">Create Account</h1>
+                    <p class="auth-subtitle">Sign up to access PCB manufacturing services</p>
+                </div>
+
+                <form class="auth-form" id="loginForm">
+                    <div class="form-group">
+                        <label for="username" class="form-label">Username</label>
+                        <div class="input-container">
+                            <input type="text" id="username" class="form-input" placeholder="Enter your username" required>
+                            <div class="input-icon">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email Address</label>
+                        <div class="input-container">
+                            <input type="email" id="email" class="form-input" placeholder="your.email@example.com" required>
+                            <div class="input-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-container">
+                            <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
+                            <div class="input-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="country" class="form-label">Country</label>
+                        <div class="input-container">
+                            <input type="text" id="country" class="form-input" placeholder="Enter your country" required>
+                            <div class="input-icon">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-footer">
+                        <label class="checkbox-container">
+                            <input type="checkbox" class="Checkbox" checked="checked" name="remember">
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-label">Remember me</span>
+                        </label>
+                        <button type="submit" class="auth-btn">
+                            <span>Sign Up</span>
+                            <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <div class="divider">
+                    <span>Or continue with</span>
+                </div>
+
+                <div class="social-auth">
+                    <button class="social-btn google">
+                        <i class="fab fa-google"></i>
+                        <span>Google</span>
+                    </button>
+                    <button class="social-btn linkedin">
+                        <i class="fab fa-linkedin"></i>
+                        <span>LinkedIn</span>
+                    </button>
+                </div>
+
+                <div class="auth-footer">
+                    <p>Already have an account?
+                        <a href="login.html" style="text-decoration: none;">
+                            Sign in
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Переключение темы
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = themeToggle.querySelector('i');
+        
+        themeToggle.addEventListener('click', () => {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            html.setAttribute('data-theme', newTheme);
+            themeIcon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            
+            // Сохраняем в localStorage
+            localStorage.setItem('theme', newTheme);
+            
+            // Анимация переключения
+            themeToggle.style.transform = 'rotate(360deg)';
+            setTimeout(() => {
+                themeToggle.style.transform = '';
+            }, 300);
+        });
+        
+        // Проверяем сохраненную тему
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            themeIcon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        });
+        
+        // Обработка формы
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Анимация кнопки
+            const submitBtn = this.querySelector('.auth-btn');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
+            submitBtn.disabled = true;
+            
+            // Имитация запроса к API
+            setTimeout(() => {
+                alert('Login successful! In a real application, this would redirect to the dashboard.');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 1500);
+        });
+        
+        // Анимация при фокусе на полях ввода
+        document.querySelectorAll('.form-input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'translateY(-2px)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'translateY(0)';
+            });
+        });
+        
+        // Эффект для социальных кнопок
+        document.querySelectorAll('.social-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const provider = this.classList.contains('google') ? 'Google' : 'LinkedIn';
+                this.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Connecting...`;
+                this.disabled = true;
+                
+                setTimeout(() => {
+                    alert(`Connecting with ${provider} would be implemented here`);
+                    this.innerHTML = `<i class="fab fa-${provider.toLowerCase()}"></i><span>${provider}</span>`;
+                    this.disabled = false;
+                }, 1000);
+            });
+        });
+    </script>
+</body>
+</html>

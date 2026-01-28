@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - PCB Manufacturing Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <!-- Шапка -->
+    <header class="main-header">
+        <div class="header-container">
+            <!-- Логотип -->
+            <div class="logo">
+                <i class="fas fa-microchip"></i>
+                <div>
+                    <h1>PCB Hub</h1>
+                    <p class="logo-subtitle">Manufacturing Platform</p>
+                </div>
+            </div>
+
+            <!-- Правая часть шапки -->
+            <div class="header-right">
+                <!-- Кнопка нового заказа -->
+                <button class="new-order-btn" id="newOrderBtn">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>New Order</span>
+                </button>
+
+                <!-- Уведомления -->
+                <div class="notification-bell" id="notificationBell">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-count">3</span>
+                </div>
+
+                <!-- Профиль пользователя -->
+                <div class="user-profile" id="userProfile">
+                    <div class="avatar">
+                        <img src="https://ui-avatars.com/api/?name=John+Smith&background=6366f1&color=fff&size=128" alt="User">
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name">John Smith</span>
+                        <span class="user-role">Hardware Engineer</span>
+                    </div>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Переключатель темы -->
+    <button class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <!-- Основной контент -->
+    <main class="main-content">
+        <!-- Приветствие -->
+        <section class="welcome-section">
+            <div class="welcome-content">
+                <h2>Welcome back, John!</h2>
+                <p>Manage your PCB manufacturing orders and track production progress</p>
+            </div>
+            <div class="welcome-stats">
+                <div class="stat-badge">
+                    <i class="fas fa-clock"></i>
+                    <span>5 Active</span>
+                </div>
+                <div class="stat-badge">
+                    <i class="fas fa-check-circle"></i>
+                    <span>24 Completed</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Заголовок раздела -->
+        <div class="section-header">
+            <h3>My Orders</h3>
+            <div class="section-actions">
+                <div class="filter-dropdown">
+                    <button class="filter-btn">
+                        <i class="fas fa-filter"></i>
+                        Filter
+                    </button>
+                </div>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search orders...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Список заказов -->
+        <div class="orders-container">
+            <!-- Карточка заказа 1 -->
+            <div class="order-card">
+                <div class="order-header">
+                    <div class="order-badge status-production">
+                        <i class="fas fa-industry"></i>
+                        In Production
+                    </div>
+                    <div class="order-actions">
+                        <button class="action-btn">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="order-content">
+                    <div class="order-icon">
+                        <i class="fas fa-microchip"></i>
+                    </div>
+                    <div class="order-details">
+                        <h4>IoT Sensor Board</h4>
+                        <p class="order-id">Order #PCB-2024-0876</p>
+                        <div class="order-meta">
+                            <span><i class="fas fa-layer-group"></i> 4 Layers</span>
+                            <span><i class="fas fa-expand-arrows-alt"></i> 100x80mm</span>
+                            <span><i class="fas fa-hashtag"></i> 250 pcs</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="order-progress">
+                    <div class="progress-info">
+                        <span>Production Progress</span>
+                        <span>75%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 75%"></div>
+                    </div>
+                </div>
+                <div class="order-footer">
+                    <div class="order-date">
+                        <i class="far fa-clock"></i>
+                        Due in 2 days
+                    </div>
+                    <button class="view-order-btn">
+                        <i class="fas fa-external-link-alt"></i>
+                        View Details
+                    </button>
+                </div>
+            </div>
+
+            <!-- Карточка заказа 2 -->
+            <div class="order-card">
+                <div class="order-header">
+                    <div class="order-badge status-review">
+                        <i class="fas fa-search"></i>
+                        Design Review
+                    </div>
+                    <div class="order-actions">
+                        <button class="action-btn">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="order-content">
+                    <div class="order-icon">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <div class="order-details">
+                        <h4>Server Motherboard</h4>
+                        <p class="order-id">Order #PCB-2024-0875</p>
+                        <div class="order-meta">
+                            <span><i class="fas fa-layer-group"></i> 8 Layers</span>
+                            <span><i class="fas fa-expand-arrows-alt"></i> 245x305mm</span>
+                            <span><i class="fas fa-hashtag"></i> 50 pcs</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="order-progress">
+                    <div class="progress-info">
+                        <span>Design Progress</span>
+                        <span>30%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 30%"></div>
+                    </div>
+                </div>
+                <div class="order-footer">
+                    <div class="order-date">
+                        <i class="far fa-clock"></i>
+                        Due in 5 days
+                    </div>
+                    <button class="view-order-btn">
+                        <i class="fas fa-external-link-alt"></i>
+                        View Details
+                    </button>
+                </div>
+            </div>
+
+            <!-- Карточка заказа 3 -->
+            <div class="order-card">
+                <div class="order-header">
+                    <div class="order-badge status-quote">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        Quote Pending
+                    </div>
+                    <div class="order-actions">
+                        <button class="action-btn">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="order-content">
+                    <div class="order-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="order-details">
+                        <h4>Robotics Controller</h4>
+                        <p class="order-id">Order #PCB-2024-0874</p>
+                        <div class="order-meta">
+                            <span><i class="fas fa-layer-group"></i> 6 Layers</span>
+                            <span><i class="fas fa-expand-arrows-alt"></i> 150x100mm</span>
+                            <span><i class="fas fa-hashtag"></i> 100 pcs</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="order-progress">
+                    <div class="progress-info">
+                        <span>Quote Progress</span>
+                        <span>10%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 10%"></div>
+                    </div>
+                </div>
+                <div class="order-footer">
+                    <div class="order-date">
+                        <i class="far fa-clock"></i>
+                        Awaiting quote
+                    </div>
+                    <button class="view-order-btn">
+                        <i class="fas fa-external-link-alt"></i>
+                        View Details
+                    </button>
+                </div>
+            </div>
+
+            <!-- Карточка заказа 4 -->
+            <div class="order-card">
+                <div class="order-header">
+                    <div class="order-badge status-completed">
+                        <i class="fas fa-check-circle"></i>
+                        Completed
+                    </div>
+                    <div class="order-actions">
+                        <button class="action-btn">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="order-content">
+                    <div class="order-icon">
+                        <i class="fas fa-bluetooth"></i>
+                    </div>
+                    <div class="order-details">
+                        <h4>Bluetooth Module</h4>
+                        <p class="order-id">Order #PCB-2024-0873</p>
+                        <div class="order-meta">
+                            <span><i class="fas fa-layer-group"></i> 2 Layers</span>
+                            <span><i class="fas fa-expand-arrows-alt"></i> 40x30mm</span>
+                            <span><i class="fas fa-hashtag"></i> 500 pcs</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="order-progress">
+                    <div class="progress-info">
+                        <span>Order Status</span>
+                        <span>100%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="order-footer">
+                    <div class="order-date">
+                        <i class="fas fa-shipping-fast"></i>
+                        Delivered 3 days ago
+                    </div>
+                    <button class="view-order-btn">
+                        <i class="fas fa-redo"></i>
+                        Reorder
+                    </button>
+                </div>
+            </div>
+
+            <!-- Карточка заказа 5 -->
+            <div class="order-card">
+                <div class="order-header">
+                    <div class="order-badge status-approved">
+                        <i class="fas fa-thumbs-up"></i>
+                        Approved
+                    </div>
+                    <div class="order-actions">
+                        <button class="action-btn">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="order-content">
+                    <div class="order-icon">
+                        <i class="fas fa-satellite"></i>
+                    </div>
+                    <div class="order-details">
+                        <h4>GPS Tracker Board</h4>
+                        <p class="order-id">Order #PCB-2024-0872</p>
+                        <div class="order-meta">
+                            <span><i class="fas fa-layer-group"></i> 4 Layers</span>
+                            <span><i class="fas fa-expand-arrows-alt"></i> 60x60mm</span>
+                            <span><i class="fas fa-hashtag"></i> 300 pcs</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="order-progress">
+                    <div class="progress-info">
+                        <span>Production Progress</span>
+                        <span>45%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 45%"></div>
+                    </div>
+                </div>
+                <div class="order-footer">
+                    <div class="order-date">
+                        <i class="far fa-clock"></i>
+                        Due in 7 days
+                    </div>
+                    <button class="view-order-btn">
+                        <i class="fas fa-external-link-alt"></i>
+                        View Details
+                    </button>
+                </div>
+            </div>
+
+            <!-- Карточка для нового заказа -->
+            <div class="order-card new-order-card" id="createNewOrder">
+                <div class="new-order-content">
+                    <div class="new-order-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <h4>Create New Order</h4>
+                    <p>Start a new PCB manufacturing project</p>
+                    <button class="create-order-btn">
+                        <i class="fas fa-plus"></i>
+                        New Order
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Пустой список (альтернативный вид) -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-icon">
+                <i class="fas fa-inbox"></i>
+            </div>
+            <h4>No orders yet</h4>
+            <p>Start your first PCB manufacturing order</p>
+            <button class="create-first-order-btn">
+                <i class="fas fa-plus"></i>
+                Create First Order
+            </button>
+        </div>
+    </main>
+
+    <!-- Модальное окно нового заказа -->
+    <div class="modal-overlay" id="newOrderModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Create New Order</h3>
+                <button class="modal-close" id="modalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-content">
+                <div class="upload-section">
+                    <div class="upload-area" id="uploadDropZone">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h4>Upload Gerber & BOM Files</h4>
+                        <p>Drag & drop or click to browse</p>
+                        <p class="file-types">Supported: .zip, .rar, .ger, .xlsx, .csv</p>
+                        <button class="upload-btn" id="uploadBtn">
+                            <i class="fas fa-folder-open"></i>
+                            Browse Files
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fas fa-tag"></i> Project Name</label>
+                            <input type="text" placeholder="Enter project name" class="form-input" id="projectName">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-layer-group"></i> PCB Layers</label>
+                            <select class="form-select" id="pcbLayers">
+                                <option>Select layers</option>
+                                <option>2 Layers</option>
+                                <option>4 Layers</option>
+                                <option>6 Layers</option>
+                                <option>8+ Layers</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fas fa-expand-arrows-alt"></i> Board Size</label>
+                            <div class="size-inputs">
+                                <input type="number" placeholder="Width" class="size-input" id="boardWidth">
+                                <span class="size-x">×</span>
+                                <input type="number" placeholder="Height" class="size-input" id="boardHeight">
+                                <select class="size-unit" id="sizeUnit">
+                                    <option>mm</option>
+                                    <option>cm</option>
+                                    <option>inch</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-hashtag"></i> Quantity</label>
+                            <div class="quantity-selector">
+                                <button class="qty-btn" id="qtyDecrease">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input type="number" value="100" class="qty-input" id="quantity">
+                                <button class="qty-btn" id="qtyIncrease">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                <select class="qty-unit" id="qtyUnit">
+                                    <option>pcs</option>
+                                    <option>panels</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-align-left"></i> Description (Optional)</label>
+                        <textarea class="form-textarea" placeholder="Add any special requirements or notes..." id="orderDescription"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-industry"></i> Preferred Manufacturer</label>
+                        <div class="manufacturer-select">
+                            <div class="manufacturer-option selected">
+                                <i class="fas fa-warehouse"></i>
+                                <span>Any (We'll match the best)</span>
+                            </div>
+                            <div class="manufacturer-option">
+                                <i class="fas fa-microchip"></i>
+                                <span>Armenia PCB Tech</span>
+                            </div>
+                            <div class="manufacturer-option">
+                                <i class="fas fa-industry"></i>
+                                <span>Yerevan Circuit Co.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn secondary" id="cancelBtn">
+                    Cancel
+                </button>
+                <button class="modal-btn primary" id="submitOrderBtn">
+                    <i class="fas fa-paper-plane"></i>
+                    Submit Order
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Переключение темы
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = themeToggle.querySelector('i');
+        
+        themeToggle.addEventListener('click', () => {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            html.setAttribute('data-theme', newTheme);
+            themeIcon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            
+            localStorage.setItem('theme', newTheme);
+            
+            themeToggle.style.transform = 'rotate(360deg)';
+            setTimeout(() => {
+                themeToggle.style.transform = '';
+            }, 300);
+        });
+        
+        // Проверяем сохраненную тему
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            themeIcon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            
+            // Добавляем анимацию для карточек
+            document.querySelectorAll('.order-card').forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+        
+        // Модальное окно нового заказа
+        const newOrderBtn = document.getElementById('newOrderBtn');
+        const createNewOrder = document.getElementById('createNewOrder');
+        const newOrderModal = document.getElementById('newOrderModal');
+        const modalClose = document.getElementById('modalClose');
+        const cancelBtn = document.getElementById('cancelBtn');
+        
+        function openModal() {
+            newOrderModal.style.display = 'flex';
+            setTimeout(() => {
+                newOrderModal.style.opacity = '1';
+                newOrderModal.querySelector('.modal').style.transform = 'translateY(0)';
+            }, 10);
+        }
+        
+        function closeModal() {
+            newOrderModal.style.opacity = '0';
+            newOrderModal.querySelector('.modal').style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                newOrderModal.style.display = 'none';
+            }, 300);
+        }
+        
+        newOrderBtn.addEventListener('click', openModal);
+        createNewOrder.addEventListener('click', openModal);
+        modalClose.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+        
+        // Закрытие модального окна по клику вне его
+        newOrderModal.addEventListener('click', (e) => {
+            if (e.target === newOrderModal) {
+                closeModal();
+            }
+        });
+        
+        // Drag & Drop для загрузки файлов
+        const uploadDropZone = document.getElementById('uploadDropZone');
+        const uploadBtn = document.getElementById('uploadBtn');
+        
+        uploadDropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadDropZone.style.borderColor = 'var(--primary)';
+            uploadDropZone.style.backgroundColor = 'var(--primary-soft)';
+        });
+        
+        uploadDropZone.addEventListener('dragleave', () => {
+            uploadDropZone.style.borderColor = 'var(--border-soft)';
+            uploadDropZone.style.backgroundColor = 'var(--bg-page)';
+        });
+        
+        uploadDropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadDropZone.style.borderColor = 'var(--border-soft)';
+            uploadDropZone.style.backgroundColor = 'var(--bg-page)';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                showUploadSuccess(files);
+            }
+        });
+        
+        uploadBtn.addEventListener('click', () => {
+            // Имитация выбора файлов
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.multiple = true;
+            input.accept = '.zip,.rar,.ger,.xlsx,.csv';
+            input.click();
+            
+            input.addEventListener('change', () => {
+                if (input.files.length > 0) {
+                    showUploadSuccess(input.files);
+                }
+            });
+        });
+        
+        function showUploadSuccess(files) {
+            uploadDropZone.innerHTML = `
+                <i class="fas fa-check-circle" style="color: var(--success); font-size: 3rem;"></i>
+                <h4>${files.length} file(s) uploaded</h4>
+                <p>${files[0].name} ${files.length > 1 ? `+ ${files.length - 1} more` : ''}</p>
+                <button class="upload-btn" id="changeFilesBtn">
+                    <i class="fas fa-exchange-alt"></i>
+                    Change Files
+                </button>
+            `;
+            
+            document.getElementById('changeFilesBtn').addEventListener('click', () => {
+                uploadDropZone.innerHTML = `
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h4>Upload Gerber & BOM Files</h4>
+                    <p>Drag & drop or click to browse</p>
+                    <p class="file-types">Supported: .zip, .rar, .ger, .xlsx, .csv</p>
+                    <button class="upload-btn" id="uploadBtn">
+                        <i class="fas fa-folder-open"></i>
+                        Browse Files
+                    </button>
+                `;
+                document.getElementById('uploadBtn').addEventListener('click', uploadBtn.click);
+            });
+        }
+        
+        // Управление количеством
+        const qtyDecrease = document.getElementById('qtyDecrease');
+        const qtyIncrease = document.getElementById('qtyIncrease');
+        const quantityInput = document.getElementById('quantity');
+        
+        qtyDecrease.addEventListener('click', () => {
+            let value = parseInt(quantityInput.value);
+            if (value > 1) {
+                quantityInput.value = value - 1;
+            }
+            animateButton(qtyDecrease);
+        });
+        
+        qtyIncrease.addEventListener('click', () => {
+            let value = parseInt(quantityInput.value);
+            quantityInput.value = value + 1;
+            animateButton(qtyIncrease);
+        });
+        
+        function animateButton(btn) {
+            btn.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                btn.style.transform = '';
+            }, 150);
+        }
+        
+        // Выбор производителя
+        document.querySelectorAll('.manufacturer-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.manufacturer-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                this.classList.add('selected');
+            });
+        });
+        
+        // Отправка заказа
+        const submitOrderBtn = document.getElementById('submitOrderBtn');
+        
+        submitOrderBtn.addEventListener('click', () => {
+            const projectName = document.getElementById('projectName').value;
+            const pcbLayers = document.getElementById('pcbLayers').value;
+            
+            if (!projectName || pcbLayers === 'Select layers') {
+                alert('Please fill in required fields: Project Name and PCB Layers');
+                return;
+            }
+            
+            // Показываем состояние загрузки
+            const originalText = submitOrderBtn.innerHTML;
+            submitOrderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            submitOrderBtn.disabled = true;
+            
+            // Имитация отправки
+            setTimeout(() => {
+                closeModal();
+                alert('Order submitted successfully! You will receive quotes from manufacturers soon.');
+                submitOrderBtn.innerHTML = originalText;
+                submitOrderBtn.disabled = false;
+                
+                // Сброс формы
+                document.getElementById('projectName').value = '';
+                document.getElementById('pcbLayers').value = 'Select layers';
+                document.getElementById('boardWidth').value = '';
+                document.getElementById('boardHeight').value = '';
+                document.getElementById('quantity').value = '100';
+                document.getElementById('orderDescription').value = '';
+            }, 2000);
+        });
+        
+        // Клики по карточкам заказов
+        document.querySelectorAll('.view-order-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const orderTitle = this.closest('.order-card').querySelector('h4').textContent;
+                const orderId = this.closest('.order-card').querySelector('.order-id').textContent;
+                
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+                this.disabled = true;
+                
+                setTimeout(() => {
+                    alert(`Opening details for ${orderTitle} (${orderId})`);
+                    this.innerHTML = '<i class="fas fa-external-link-alt"></i> View Details';
+                    this.disabled = false;
+                }, 1000);
+            });
+        });
+        
+        // Клики по карточкам заказов (весь элемент)
+        document.querySelectorAll('.order-card:not(.new-order-card)').forEach(card => {
+            card.addEventListener('click', function() {
+                if (this.classList.contains('active')) {
+                    this.classList.remove('active');
+                } else {
+                    document.querySelectorAll('.order-card').forEach(c => {
+                        c.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                }
+            });
+        });
+        
+        // Уведомления
+        const notificationBell = document.getElementById('notificationBell');
+        
+        notificationBell.addEventListener('click', function() {
+            const count = this.querySelector('.notification-count');
+            const currentCount = parseInt(count.textContent);
+            
+            if (currentCount > 0) {
+                count.textContent = '0';
+                count.style.backgroundColor = 'var(--success)';
+                this.style.transform = 'scale(1.1)';
+                
+                setTimeout(() => {
+                    this.style.transform = '';
+                    alert('All notifications marked as read');
+                }, 300);
+            }
+        });
+        
+        // Профиль пользователя
+        const userProfile = document.getElementById('userProfile');
+        
+        userProfile.addEventListener('click', function() {
+            const menu = document.createElement('div');
+            menu.className = 'profile-menu';
+            menu.innerHTML = `
+                <div class="menu-item">
+                    <i class="fas fa-user"></i>
+                    <span>My Profile</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Help & Support</span>
+                </div>
+                <div class="menu-divider"></div>
+                <div class="menu-item logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Log Out</span>
+                </div>
+            `;
+            
+            const rect = this.getBoundingClientRect();
+            menu.style.position = 'fixed';
+            menu.style.top = `${rect.bottom + 5}px`;
+            menu.style.right = `${window.innerWidth - rect.right}px`;
+            menu.style.zIndex = '1000';
+            
+            document.body.appendChild(menu);
+            
+            // Клик вне меню для закрытия
+            function closeMenu(e) {
+                if (!menu.contains(e.target) && e.target !== userProfile) {
+                    menu.remove();
+                    document.removeEventListener('click', closeMenu);
+                }
+            }
+            
+            setTimeout(() => {
+                document.addEventListener('click', closeMenu);
+            }, 10);
+            
+            // Обработка кликов по пунктам меню
+            menu.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const text = this.querySelector('span').textContent;
+                    if (text === 'Log Out') {
+                        if (confirm('Are you sure you want to log out?')) {
+                            alert('Logged out successfully');
+                            window.location.href = 'login.html';
+                        }
+                    } else {
+                        alert(`${text} would open here`);
+                    }
+                    menu.remove();
+                });
+            });
+        });
+        
+        // Анимации при наведении
+        document.querySelectorAll('.order-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                if (!this.classList.contains('new-order-card')) {
+                    this.style.transform = 'translateY(-5px)';
+                }
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('new-order-card')) {
+                    this.style.transform = '';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
