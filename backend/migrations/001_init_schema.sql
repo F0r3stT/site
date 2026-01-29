@@ -1,13 +1,13 @@
-CREATE TABLE users (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    role VARCHAR(20) NOT NULL CHECK (role IN ('customer', 'factory', 'dfm', 'admin')),
-    company_name VARCHAR(255),
-    country VARCHAR(100) NOT NULL,
-    phone VARCHAR(50),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE IF NOT EXISTS users (
+    id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    email           citext UNIQUE NOT NULL,
+    password_hash   text NOT NULL,
+    role            text NOT NULL CHECK (role IN ('customer','factory','dfm','admin')),
+    company_name    text,
+    country         text NOT NULL,
+    phone           text,
+    created_at      timestamptz NOT NULL DEFAULT now(),
+    updated_at      timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE TABLE orders (
@@ -82,5 +82,16 @@ CREATE TABLE offers (
     UNIQUE(order_id, factory_id)
 );
 
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+    id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id     uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token_hash  text NOT NULL,
+    expires_at  timestamptz NOT NULL,
+    revoked_at  timestamptz,
+    created_at  timestamptz NOT NULL DEFAULT now(),
+    UNIQUE(user_id, token_hash)
+);
 CREATE INDEX idx_offers_order ON offers(order_id);
 CREATE INDEX idx_offers_factory ON offers(factory_id);
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_id ON refresh_tokens(user_id);
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_expires_at ON refresh_tokens(expires_at);

@@ -1,25 +1,22 @@
 package handler
 
 import (
-	"log"
+	"errors"
 	"net/http"
-	"time"
 
 	"sitecircuitworks/internal/domain"
+	"sitecircuitworks/internal/repository/postgres"
+	"sitecircuitworks/internal/service"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v4"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthHandler struct {
-	jwtSecret string
+	auth *service.AuthService
 }
 
-func NewAuthHandler(jwtSecret string) *AuthHandler {
-	return &AuthHandler{
-		jwtSecret: jwtSecret,
-	}
+func NewAuthHandler(auth *service.AuthService) *AuthHandler {
+	return &AuthHandler{auth: auth}
 }
 
 type RegisterRequest struct {
@@ -38,26 +35,26 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	// Хеширование пароля
-	_, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	u, err := h.auth.Register(c.Request.Context(), service.RegisterInput{
+		Email:       req.Email,
+		Password:    req.Password,
+		Role:        req.Role,
+		CompanyName: req.CompanyName,
+		Country:     req.Country,
+		Phone:       req.Phone,
+	})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+		if errors.Is(err, postgres.ErrEmailExists) {
+			c.JSON(http.StatusConflict, gin.H{"error": "Email already registered"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register"})
 		return
 	}
 
-	// Режим разработки - просто логируем
-	log.Printf("DEV MODE: User registered - Email: %s, Role: %s, Company: %s",
-		req.Email, req.Role, req.CompanyName)
-
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "User registered successfully",
-		"user": gin.H{
-			"email":   req.Email,
-			"role":    req.Role,
-			"company": req.CompanyName,
-			"country": req.Country,
-			"phone":   req.Phone,
-		},
+		"user":    u,
 	})
 }
 
@@ -73,54 +70,21 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// Тестовые учетные данные для разработки
-	validCredentials := map[string]string{
-		"customer@example.com": "password123",
-		"factory@example.com":  "password123",
-		"admin@example.com":    "password123",
-		"dfm@example.com":      "password123",
-	}
-
-	// Проверка учетных данных
-	expectedPassword, exists := validCredentials[req.Email]
-	if !exists || req.Password != expectedPassword {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
-		return
-	}
-
-	// Определяем роль по email
-	role := "customer"
-	switch req.Email {
-	case "factory@example.com":
-		role = "factory"
-	case "admin@example.com":
-		role = "admin"
-	case "dfm@example.com":
-		role = "dfm"
-	}
-
-	// Генерация токенов
-	accessToken, err := h.generateToken(req.Email, role, 15*time.Minute)
+	access, refresh, user, err := h.auth.Login(c.Request.Context(), req.Email, req.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		if errors.Is(err, service.ErrInvalidCredentials) || errors.Is(err, postgres.ErrUserNotFound) {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Login failed"})
 		return
 	}
 
-	refreshToken, err := h.generateToken(req.Email, role, 7*24*time.Hour)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate refresh token"})
-		return
-	}
-
+	// фронт ждёт ровно это :contentReference[oaicite:5]{index=5}
 	c.JSON(http.StatusOK, gin.H{
-		"access_token":  accessToken,
-		"refresh_token": refreshToken,
-		"user": gin.H{
-			"id":      "user-" + req.Email, // временный ID
-			"email":   req.Email,
-			"role":    role,
-			"company": "Demo Company",
-		},
+		"access_token":  access,
+		"refresh_token": refresh,
+		"user":          user,
 	})
 }
 
@@ -128,52 +92,34 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	var req struct {
 		RefreshToken string `json:"refresh_token" binding:"required"`
 	}
-
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Декодируем refresh токен для получения данных пользователя
-	token, err := jwt.Parse(req.RefreshToken, func(token *jwt.Token) (interface{}, error) {
-		return []byte(h.jwtSecret), nil
-	})
-
-	if err != nil || !token.Valid {
+	newAccess, err := h.auth.Refresh(c.Request.Context(), req.RefreshToken)
+	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token"})
 		return
 	}
 
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
-		return
-	}
-
-	userID, _ := claims["user_id"].(string)
-	role, _ := claims["role"].(string)
-
-	// Генерируем новый access токен
-	newAccessToken, err := h.generateToken(userID, role, 15*time.Minute)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
-		return
-	}
-
 	c.JSON(http.StatusOK, gin.H{
-		"access_token": newAccessToken,
+		"access_token": newAccess,
 		"message":      "Token refreshed successfully",
 	})
 }
 
-func (h *AuthHandler) generateToken(userID, role string, expiry time.Duration) (string, error) {
-	claims := jwt.MapClaims{
-		"user_id": userID,
-		"role":    role,
-		"exp":     time.Now().Add(expiry).Unix(),
-		"iat":     time.Now().Unix(),
+func (h *AuthHandler) Logout(c *gin.Context) {
+	var req struct {
+		RefreshToken string `json:"refresh_token" binding:"required"`
 	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(h.jwtSecret))
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := h.auth.Logout(c.Request.Context(), req.RefreshToken); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Logged out"})
 }

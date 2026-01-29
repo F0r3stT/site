@@ -8,6 +8,10 @@ import (
 	"sitecircuitworks/internal/config"
 	"sitecircuitworks/internal/handler"
 	"sitecircuitworks/internal/middleware"
+	"sitecircuitworks/internal/pkg/database"
+	"sitecircuitworks/internal/repository/postgres"
+	pgrepo "sitecircuitworks/internal/repository/postgres"
+	"sitecircuitworks/internal/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -15,8 +19,8 @@ import (
 
 func main() {
 	// Загрузка переменных окружения
-	if err := godotenv.Load(); err != nil {
-		log.Println("Warning: .env file not found")
+	if err := godotenv.Load(".env"); err != nil {
+		log.Println("Warning: .env file not found:", err)
 	}
 
 	// Загрузка конфигурации
@@ -34,11 +38,24 @@ func main() {
 		middleware.CORS(),
 		middleware.Logger(),
 	)
+	db, err := database.NewPostgres(database.DBConfig{
+		Host: cfg.DB.Host, Port: cfg.DB.Port, User: cfg.DB.User,
+		Password: cfg.DB.Password, DBName: cfg.DB.DBName, SSLMode: cfg.DB.SSLMode,
+	})
 
-	// Инициализация обработчиков
-	// Используем упрощенные конструкторы без БД
-	authHandler := handler.NewAuthHandler(cfg.JWTSecret)
-	orderHandler := handler.NewOrderHandler(cfg.S3Config)
+	if err != nil {
+		log.Fatal("❌ DB connection failed:", err)
+	}
+	defer db.Close()
+
+	userRepo := pgrepo.NewUserRepo(db)
+	refreshRepo := pgrepo.NewRefreshTokenRepo(db)
+	authSvc := service.NewAuthService(userRepo, refreshRepo, cfg.JWTSecret)
+
+	authHandler := handler.NewAuthHandler(authSvc)
+	orderRepo := postgres.NewOrderRepo(db)
+	orderHandler := handler.NewOrderHandler(orderRepo)
+
 	// factoryHandler := handler.NewFactoryHandler() // пока закомментируем
 
 	// Публичные маршруты
@@ -48,6 +65,7 @@ func main() {
 		api.POST("/auth/register", authHandler.Register)
 		api.POST("/auth/login", authHandler.Login)
 		api.POST("/auth/refresh", authHandler.RefreshToken)
+		api.POST("/auth/logout", authHandler.Logout)
 
 		// Публичная информация
 		api.GET("/stats", func(c *gin.Context) {
@@ -64,15 +82,16 @@ func main() {
 	protected.Use(middleware.Auth(cfg.JWTSecret))
 	{
 		// Заказы
+		protected.GET("/orders", orderHandler.ListOrders)
 		protected.POST("/orders", orderHandler.CreateOrder)
-		// protected.GET("/orders", orderHandler.ListOrders) // пока закомментируем
+
 		// protected.GET("/orders/:id", orderHandler.GetOrder)
 		// protected.PUT("/orders/:id/status", orderHandler.UpdateOrderStatus)
 		protected.POST("/orders/:id/files", orderHandler.UploadOrderFile)
 
 		// Для заводов (пока закомментируем)
 		// protected.GET("/factory/orders", factoryHandler.ListAvailableOrders)
-		// protected.POST("/orders/:id/offer", factoryHandler.CreateOffer)
+
 		// protected.PUT("/offers/:id/accept", factoryHandler.AcceptOffer)
 	}
 

@@ -113,6 +113,8 @@
             </div>
         </div>
     </div>
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
 
     <script>
         // Переключение темы
@@ -145,23 +147,47 @@
         });
         
         // Обработка формы
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Анимация кнопки
-            const submitBtn = this.querySelector('.auth-btn');
-            const originalText = submitBtn.innerHTML;
-            
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
-            submitBtn.disabled = true;
-            
-            // Имитация запроса к API
-            setTimeout(() => {
-                alert('Login successful! In a real application, this would redirect to the dashboard.');
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-            }, 1500);
-        });
+        document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const payload = {
+    email: document.getElementById("email").value,
+    password: document.getElementById("password").value,
+    role: "customer",
+    country: document.getElementById("country").value
+  };
+
+  const password = document.getElementById("password").value;
+
+if (password.length < 8) {
+  alert("Password must be at least 8 characters");
+  return;
+}
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert("Registration успешна!");
+      window.location.href = "login.html";
+    } else if (data.error.includes("Password")) 
+    alert("Пароль должен быть минимум 8 символов"); 
+
+    else {
+      alert(data.error || "Ошибка регистрации");
+    }
+
+  } catch (err) {
+    alert("Network error: API недоступен");
+  }
+});
+
+
         
         // Анимация при фокусе на полях ввода
         document.querySelectorAll('.form-input').forEach(input => {

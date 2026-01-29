@@ -93,6 +93,8 @@
             </div>
         </div>
     </div>
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
 
     <script>
         // Переключение темы
@@ -125,24 +127,40 @@
         });
         
         // Обработка формы
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Анимация кнопки
-            const submitBtn = this.querySelector('.auth-btn');
-            const originalText = submitBtn.innerHTML;
-            
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
-            submitBtn.disabled = true;
-            
-            // Имитация запроса к API
-            setTimeout(() => {
-                localStorage.setItem('IsLoggedIn', true);
-                window.location.href = 'dashboard.html';
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-            }, 1500);
-        });
+       document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const payload = {
+    email: document.getElementById("username").value,
+    password: document.getElementById("password").value
+  };
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.error || "Login failed");
+      return;
+    }
+
+    // сохраняем токены
+    localStorage.setItem("token", data.access_token);
+    localStorage.setItem("refresh_token", data.refresh_token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+
+    window.location.href = "dashboard.html";
+
+  } catch (err) {
+    alert("Network error");
+  }
+});
+
         
         // Анимация при фокусе на полях ввода
         document.querySelectorAll('.form-input').forEach(input => {

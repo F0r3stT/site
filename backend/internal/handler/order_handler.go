@@ -10,18 +10,21 @@ import (
 	"path/filepath"
 	"time"
 
-	"sitecircuitworks/internal/config"
 	"sitecircuitworks/internal/domain"
 
 	"github.com/gin-gonic/gin"
 )
 
-type OrderHandler struct {
-	// Пока пустая структура для разработки
+type OrderRepository interface {
+	ListByUser(userID string) ([]domain.Order, error)
 }
 
-func NewOrderHandler(s3Cfg config.S3Config) *OrderHandler {
-	return &OrderHandler{}
+type OrderHandler struct {
+	repo OrderRepository
+}
+
+func NewOrderHandler(repo OrderRepository) *OrderHandler {
+	return &OrderHandler{repo: repo}
 }
 
 type CreateOrderRequest struct {
@@ -66,6 +69,17 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 			"created_at":   time.Now().Format(time.RFC3339),
 		},
 	})
+}
+func (h *OrderHandler) ListOrders(c *gin.Context) {
+	userID := c.GetString("user_id")
+
+	orders, err := h.repo.ListByUser(userID)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Failed to load orders"})
+		return
+	}
+
+	c.JSON(200, orders)
 }
 
 func (h *OrderHandler) UploadOrderFile(c *gin.Context) {
