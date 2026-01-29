@@ -1,0 +1,8 @@
+{
+  "name": "pcb-marketplace-frontend",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "npx serve . -p 8000",
+    "dev": "npx live-server . --port=8000"
+  }
+}

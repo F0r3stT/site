@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Files - PCB Marketplace</title>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2563eb;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .file-upload {
+            border: 2px dashed #cbd5e1;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        .file-upload:hover {
+            border-color: #2563eb;
+        }
+        .file-upload i {
+            font-size: 48px;
+            color: #94a3b8;
+            margin-bottom: 15px;
+        }
+        .file-upload.dragover {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+        button:hover:not(:disabled) {
+            background: #1d4ed8;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #2563eb;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .auth-info {
+            background: #fef3c7;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .file-list {
+            margin-top: 20px;
+        }
+        .file-item {
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .file-info {
+            flex: 1;
+        }
+        .file-size {
+            color: #64748b;
+            font-size: 12px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            margin-top: 5px;
+            overflow: hidden;
+            display: none;
+        }
+        .progress {
+            height: 100%;
+            background: #2563eb;
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📎 Upload Files</h1>
+        
+        <div class="auth-info" id="authInfo">
+            <strong>Authentication Status:</strong>
+            <span id="authStatus">Checking...</span>
+        </div>
+        
+        <div class="form-group">
+            <label for="order_id">Order ID:</label>
+            <input type="text" id="order_id" 
+                   placeholder="Enter order ID or select from list">
+            <small>Get order ID from created orders</small>
+        </div>
+        
+        <div class="file-upload" id="dropZone">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <h3>Drag & Drop Files Here</h3>
+            <p>or click to browse</p>
+            <p><small>Supported: .zip, .rar, .7z, .gbr, .ger, .xlsx, .csv (Max 50MB)</small></p>
+            <input type="file" id="fileInput" multiple style="display: none;">
+        </div>
+        
+        <div id="fileList" class="file-list"></div>
+        
+        <div id="progressBar" class="progress-bar">
+            <div class="progress"></div>
+        </div>
+        
+        <button id="uploadBtn" disabled>Upload Files</button>
+        
+        <div id="message" class="message"></div>
+        
+        <a href="/static/index.html" class="back-link">← Back to API Testing</a>
+        <a href="/static/create-order.html" class="back-link">Create New Order →</a>
+    </div>
+
+    <script>
+        const API_BASE = '/api/v1';
+        let selectedFiles = [];
+        let orderId = '';
+        
+        // Check authentication
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            const authInfo = document.getElementById('authInfo');
+            const authStatus = document.getElementById('authStatus');
+            
+            if (token && user) {
+                try {
+                    const userData = JSON.parse(user);
+                    authStatus.innerHTML = `✅ Logged in as <strong>${userData.email}</strong>`;
+                    authInfo.style.background = '#d1fae5';
+                    return token;
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                }
+            }
+            
+            authStatus.innerHTML = '❌ Not logged in. <a href="/static/login.html" style="color: #2563eb;">Login first</a>';
+            authInfo.style.background = '#fee2e2';
+            return null;
+        }
+        
+        // Get order ID from URL
+        function getOrderIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('order_id');
+            if (orderId) {
+                document.getElementById('order_id').value = orderId;
+                validateOrderId();
+            }
+        }
+        
+        // Validate order ID
+        function validateOrderId() {
+            orderId = document.getElementById('order_id').value.trim();
+            const uploadBtn = document.getElementById('uploadBtn');
+            uploadBtn.disabled = !orderId || selectedFiles.length === 0;
+            return orderId;
+        }
+        
+        // Handle file selection
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            handleFiles(Array.from(e.target.files));
+        });
+        
+        // Drag and drop
+        const dropZone = document.getElementById('dropZone');
+        
+        dropZone.addEventListener('click', () => {
+            document.getElementById('fileInput').click();
+        });
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            handleFiles(Array.from(e.dataTransfer.files));
+        });
+        
+        // Handle selected files
+        function handleFiles(files) {
+            const allowedTypes = ['.zip', '.rar', '.7z', '.gbr', '.ger', '.xlsx', '.csv', '.txt'];
+            const maxSize = 50 * 1024 * 1024; // 50MB
+            
+            files.forEach(file => {
+                const ext = '.' + file.name.split('.').pop().toLowerCase();
+                
+                if (!allowedTypes.includes(ext)) {
+                    alert(`File type not allowed: ${file.name}\nAllowed: ${allowedTypes.join(', ')}`);
+                    return;
+                }
+                
+                if (file.size > maxSize) {
+                    alert(`File too large: ${file.name}\nMax size: 50MB`);
+                    return;
+                }
+                
+                // Add to selected files if not already
+                if (!selectedFiles.find(f => f.name === file.name && f.size === file.size)) {
+                    selectedFiles.push(file);
+                    addFileToList(file);
+                }
+            });
+            
+            validateOrderId();
+        }
+        
+        // Add file to list
+        function addFileToList(file) {
+            const fileList = document.getElementById('fileList');
+            const fileSize = formatFileSize(file.size);
+            
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.innerHTML = `
+                <div class="file-info">
+                    <strong>${file.name}</strong>
+                    <div class="file-size">${fileSize}</div>
+                </div>
+                <button onclick="removeFile('${file.name}', ${file.size})" 
+                        style="background: none; border: none; color: #ef4444; cursor: pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            fileList.appendChild(fileItem);
+        }
+        
+        // Remove file from list
+        function removeFile(fileName, fileSize) {
+            selectedFiles = selectedFiles.filter(f => !(f.name === fileName && f.size === fileSize));
+            document.getElementById('fileList').innerHTML = '';
+            selectedFiles.forEach(addFileToList);
+            validateOrderId();
+        }
+        
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // Upload files
+        document.getElementById('uploadBtn').addEventListener('click', async function() {
+            const token = checkAuth();
+            if (!token) {
+                alert('Please login first!');
+                window.location.href = '/static/login.html';
+                return;
+            }
+            
+            if (!validateOrderId()) {
+                alert('Please enter Order ID');
+                return;
+            }
+            
+            if (selectedFiles.length === 0) {
+                alert('Please select files to upload');
+                return;
+            }
+            
+            const uploadBtn = document.getElementById('uploadBtn');
+            const progressBar = document.getElementById('progressBar');
+            const progress = progressBar.querySelector('.progress');
+            const messageDiv = document.getElementById('message');
+            
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Uploading...';
+            progressBar.style.display = 'block';
+            progress.style.width = '0%';
+            
+            // Clear previous message
+            messageDiv.style.display = 'none';
+            messageDiv.textContent = '';
+            messageDiv.className = 'message';
+            
+            try {
+                // Upload each file
+                for (let i = 0; i < selectedFiles.length; i++) {
+                    const file = selectedFiles[i];
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    
+                    const response = await fetch(`${API_BASE}/orders/${orderId}/files`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(data.error || `Failed to upload ${file.name}`);
+                    }
+                    
+                    const progressPercent = ((i + 1) / selectedFiles.length) * 100;
+                    progress.style.width = `${progressPercent}%`;
+                }
+                
+                // Success
+                messageDiv.textContent = `✅ Successfully uploaded ${selectedFiles.length} file(s) to order ${orderId}`;
+                messageDiv.className = 'message success';
+                messageDiv.style.display = 'block';
+                
+                selectedFiles = [];
+                document.getElementById('fileList').innerHTML = '';
+                document.getElementById('fileInput').value = '';
+                
+                setTimeout(() => {
+                    progressBar.style.display = 'none';
+                    uploadBtn.disabled = false;
+                    uploadBtn.textContent = 'Upload Files';
+                }, 2000);
+                
+            } catch (error) {
+                messageDiv.textContent = '❌ Error: ' + error.message;
+                messageDiv.className = 'message error';
+                messageDiv.style.display = 'block';
+                
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'Upload Files';
+                progressBar.style.display = 'none';
+            }
+        });
+        
+        window.onload = function() {
+            checkAuth();
+            getOrderIdFromUrl();
+            document.getElementById('order_id').addEventListener('input', validateOrderId);
+        };
+    </script>
+</body>
+</html>
