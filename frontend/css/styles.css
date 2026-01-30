@@ -50,46 +50,6 @@
     --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-:root[data-theme="dark"] {
-    /* ===== Основные цвета ===== */
-    --bg-page: hsl(222, 47%, 8%);
-    --bg-section-a: hsl(222, 47%, 10%);
-    --bg-section-b: hsl(222, 47%, 12%);
-    --bg-card: hsl(222, 47%, 14%);
-    --bg-hover: hsl(222, 47%, 18%);
-    --bg-header: hsl(222, 47%, 10% / 0.95);
-    
-    /* ===== Брендовые цвета ===== */
-    --primary: hsl(221, 83%, 65%);
-    --primary-hover: hsl(221, 83%, 70%);
-    --primary-soft: hsl(221, 83%, 20%);
-    --primary-glow: hsla(221, 83%, 65%, 0.15);
-    
-    /* ===== Акцентные цвета ===== */
-    --accent-gold: hsl(42, 85%, 65%);
-    --accent-teal: hsl(172, 66%, 60%);
-    --accent-purple: hsl(262, 83%, 68%);
-    
-    /* ===== Текст ===== */
-    --text-main: hsl(210, 40%, 98%);
-    --text-muted: hsl(215, 16%, 65%);
-    --text-inverse: hsl(222, 47%, 8%);
-    --text-soft: hsl(215, 16%, 45%);
-    
-    /* ===== Границы и тени ===== */
-    --border-soft: hsl(222, 47%, 20%);
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.25);
-    --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.35);
-    --shadow-xl: 0 40px 80px rgba(0, 0, 0, 0.4);
-    --shadow-primary: 0 8px 24px hsla(221, 83%, 65%, 0.25);
-    
-    /* ===== Статусные цвета ===== */
-    --success: hsl(142, 71%, 55%);
-    --danger: hsl(0, 84%, 65%);
-    --warning: hsl(38, 92%, 60%);
-}
-
 /* === СБРОС И БАЗОВЫЕ СТИЛИ === */
 * {
     margin: 0;
@@ -299,9 +259,6 @@ p {
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-:root[data-theme="dark"] .theme-toggle-thumb {
-    transform: translateX(20px);
-}
 
 /* === КНОПКИ (ПРЕМИАЛЬНЫЙ СТИЛЬ) === */
 .btn {
@@ -360,7 +317,6 @@ p {
 .btn-outline {
     background: transparent;
     color: var(--text-main);
-    border: 2px solid var(--border-soft);
     box-shadow: var(--shadow-sm);
 }
 
@@ -484,8 +440,7 @@ p {
     transform: translateY(-1px);
     box-shadow: 0 8px 16px hsl(221 83% 50% / 0.4);
 }
-
-.hero .btn--secondary {
+.btn--secondary {
     background: var(--bg-section-a);
     color: var(--text-main);
     border-color: var(--accent-gold);
@@ -1007,7 +962,7 @@ p {
 .footer-content {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 3rem;
+    gap: 15rem;
     margin-bottom: 3rem;
 }
 

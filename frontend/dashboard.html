@@ -374,17 +374,19 @@
             </div>
             <div class="modal-content">
                 <div class="upload-section">
-                    <div class="upload-area" id="uploadDropZone">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <h4>Upload Gerber & BOM Files</h4>
-                        <p>Drag & drop or click to browse</p>
-                        <p class="file-types">Supported: .zip, .rar, .ger, .xlsx, .csv</p>
-                        <button class="upload-btn" id="uploadBtn">
-                            <i class="fas fa-folder-open"></i>
-                            Browse Files
-                        </button>
-                    </div>
-                </div>
+    <div class="upload-area" id="uploadDropZone">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <h4>Upload Gerber & BOM Files</h4>
+        <p>Drag & drop or click to browse</p>
+        <p class="file-types">Supported: .zip, .rar, .ger, .xlsx, .csv</p>
+        <input type="file" id="realFileInput" multiple accept=".zip,.rar,.ger,.xlsx,.csv" style="display: none;">
+        <button class="upload-btn" id="uploadBtn">
+            <i class="fas fa-folder-open"></i>
+            Browse Files
+        </button>
+        <div id="selectedFilesList" class="selected-files"></div>
+    </div>
+</div>
 
                 <div class="form-section">
                     <div class="form-row">
@@ -543,8 +545,10 @@
         });
         
         // Drag & Drop для загрузки файлов
-        const uploadDropZone = document.getElementById('uploadDropZone');
-        const uploadBtn = document.getElementById('uploadBtn');
+        let selectedFiles = [];
+
+const uploadDropZone = document.getElementById('uploadDropZone');
+const uploadBtn = document.getElementById('uploadBtn');
         
         uploadDropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -564,7 +568,8 @@
             
             const files = e.dataTransfer.files;
             if (files.length > 0) {
-                showUploadSuccess(files);
+                selectedFiles = Array.from(files);
+                showUploadSuccess(selectedFiles);
             }
         });
         
@@ -577,10 +582,11 @@
             input.click();
             
             input.addEventListener('change', () => {
-                if (input.files.length > 0) {
-                    showUploadSuccess(input.files);
-                }
-            });
+    if (input.files.length > 0) {
+        selectedFiles = Array.from(input.files);
+        showUploadSuccess(selectedFiles);
+    }
+});
         });
         
         function showUploadSuccess(files) {
@@ -608,7 +614,41 @@
                 document.getElementById('uploadBtn').addEventListener('click', uploadBtn.click);
             });
         }
-        
+        async function uploadFilesToOrder(orderId, files, token) {
+    for (const file of files) {
+        const formData = new FormData();
+
+        // БЭКЕНД ЖДЁТ ИМЕННО "file"
+        formData.append('file', file);
+
+        // необязательно, но полезно — backend умеет читать c.PostForm("type")
+        const ext = file.name.split('.').pop().toLowerCase();
+        let fileType = 'other';
+        if (['zip', 'rar', 'ger'].includes(ext)) fileType = 'gerber';
+        if (['xlsx', 'csv'].includes(ext)) fileType = 'bom';
+        formData.append('type', fileType);
+
+        const resp = await fetch(`${API_BASE_URL}/orders/${orderId}/files`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData
+        });
+
+        if (!resp.ok) {
+            let msg = '';
+            try {
+                const j = await resp.json();
+                msg = j.error || JSON.stringify(j);
+            } catch {
+                msg = await resp.text();
+            }
+            throw new Error(`Не удалось загрузить "${file.name}": ${resp.status} ${msg}`);
+        }
+    }
+}
+
         // Управление количеством
         const qtyDecrease = document.getElementById('qtyDecrease');
         const qtyIncrease = document.getElementById('qtyIncrease');
@@ -648,54 +688,106 @@
         // Отправка заказа
         const submitOrderBtn = document.getElementById('submitOrderBtn');
         
-        submitOrderBtn.addEventListener('click', () => {
-            const projectName = document.getElementById('projectName').value;
-            const pcbLayers = document.getElementById('pcbLayers').value;
-            
-            if (!projectName || pcbLayers === 'Select layers') {
-                alert('Please fill in required fields: Project Name and PCB Layers');
-                return;
-            }
-            
-            // Показываем состояние загрузки
-            const originalText = submitOrderBtn.innerHTML;
-            submitOrderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
-            submitOrderBtn.disabled = true;
-            
-            // Имитация отправки
-            setTimeout(() => {
-                closeModal();
-                alert('Order submitted successfully! You will receive quotes from manufacturers soon.');
-                submitOrderBtn.innerHTML = originalText;
-                submitOrderBtn.disabled = false;
-                
-                // Сброс формы
-                document.getElementById('projectName').value = '';
-                document.getElementById('pcbLayers').value = 'Select layers';
-                document.getElementById('boardWidth').value = '';
-                document.getElementById('boardHeight').value = '';
-                document.getElementById('quantity').value = '100';
-                document.getElementById('orderDescription').value = '';
-            }, 2000);
+        submitOrderBtn.addEventListener('click', async () => {
+    const projectName = document.getElementById('projectName').value;
+    const pcbLayers = document.getElementById('pcbLayers').value;
+    
+    if (!projectName || pcbLayers === 'Select layers') {
+        alert('Please fill in required fields: Project Name and PCB Layers');
+        return;
+    }
+    
+    // Показываем состояние загрузки
+    const originalText = submitOrderBtn.innerHTML;
+    submitOrderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+    submitOrderBtn.disabled = true;
+    
+    try {
+        // 1. Сначала создаем заказ
+        const orderData = {
+            title: projectName,
+            description: document.getElementById('orderDescription').value || '',
+            pcb_quantity: parseInt(document.getElementById('quantity').value) || 100,
+            pcb_width: parseInt(document.getElementById('boardWidth').value) || 100,
+            pcb_height: parseInt(document.getElementById('boardHeight').value) || 80,
+            layer_count: parseInt(pcbLayers.split(' ')[0]) || 2,
+            material: 'FR-4', // Можно добавить поле в форму
+            smt_required: false // Можно добавить поле в форму
+        };
+        
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('Please login to create an order');
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        // Создание заказа
+        const orderResponse = await fetch(`${API_BASE_URL}/orders`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(orderData)
         });
         
-        // Клики по карточкам заказов
-        document.querySelectorAll('.view-order-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const orderTitle = this.closest('.order-card').querySelector('h4').textContent;
-                const orderId = this.closest('.order-card').querySelector('.order-id').textContent;
-                
-                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-                this.disabled = true;
-                
-                setTimeout(() => {
-                    alert(`Opening details for ${orderTitle} (${orderId})`);
-                    this.innerHTML = '<i class="fas fa-external-link-alt"></i> View Details';
-                    this.disabled = false;
-                }, 1000);
+        if (!orderResponse.ok) {
+            const error = await orderResponse.json();
+            throw new Error(error.error || 'Failed to create order');
+        }
+        
+        const order = await orderResponse.json();
+        if (selectedFiles.length > 0) {
+            await uploadFilesToOrder(order.id, selectedFiles, token);
+            selectedFiles = [];
+        }
+
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.multiple = true;
+        fileInput.accept = '.zip,.rar,.ger,.xlsx,.csv';
+        
+        // Симуляция выбора файлов (в реальном приложении это будет реальный input)
+        // Здесь мы просто проверяем, были ли загружены файлы через UI
+        const uploadArea = document.getElementById('uploadDropZone');
+        const files = []; // Здесь должны быть реальные файлы
+        
+        if (files.length > 0) {
+            const formData = new FormData();
+            files.forEach(file => {
+                formData.append('files', file);
             });
-        });
+            
+            const uploadResponse = await fetch(`${API_BASE_URL}/orders/${order.id}/files`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+            
+            if (!uploadResponse.ok) {
+                console.warn('File upload failed, but order was created');
+            }
+        }
+        
+        // Закрываем модальное окно и показываем успех
+        closeModal();
+        alert('Order submitted successfully! You will receive quotes from manufacturers soon.');
+        
+        // Обновляем список заказов
+        if (typeof loadUserOrders === 'function') {
+            loadUserOrders();
+        }
+        
+    } catch (error) {
+        alert('Error: ' + error.message);
+    } finally {
+        submitOrderBtn.innerHTML = originalText;
+        submitOrderBtn.disabled = false;
+    }
+});
         
         // Клики по карточкам заказов (весь элемент)
         document.querySelectorAll('.order-card:not(.new-order-card)').forEach(card => {
@@ -823,5 +915,6 @@
   document.getElementById("avatar-text").textContent = name[0].toUpperCase();
 });
     </script>
+    
 </body>
 </html>

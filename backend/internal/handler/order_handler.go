@@ -1,9 +1,9 @@
 package handler
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -11,20 +11,24 @@ import (
 	"time"
 
 	"sitecircuitworks/internal/domain"
+	"sitecircuitworks/internal/pkg/utils"
+	"sitecircuitworks/internal/repository/postgres"
 
 	"github.com/gin-gonic/gin"
 )
 
 type OrderRepository interface {
 	ListByUser(userID string) ([]domain.Order, error)
+	Create(ctx context.Context, userID string, o *domain.Order) error
 }
 
 type OrderHandler struct {
-	repo OrderRepository
+	repo     OrderRepository
+	fileRepo *postgres.OrderFileRepo
 }
 
-func NewOrderHandler(repo OrderRepository) *OrderHandler {
-	return &OrderHandler{repo: repo}
+func NewOrderHandler(repo OrderRepository, fileRepo *postgres.OrderFileRepo) *OrderHandler {
+	return &OrderHandler{repo: repo, fileRepo: fileRepo}
 }
 
 type CreateOrderRequest struct {
@@ -51,117 +55,128 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 		return
 	}
 
-	// Временно просто возвращаем успех без БД
-	c.JSON(http.StatusCreated, gin.H{
-		"id":      fmt.Sprintf("order-%d", time.Now().UnixNano()),
-		"status":  domain.StatusDraft,
-		"message": "Order created successfully",
-		"data": gin.H{
-			"title":        req.Title,
-			"description":  req.Description,
-			"pcb_quantity": req.PCBQuantity,
-			"pcb_width":    req.PCBWidth,
-			"pcb_height":   req.PCBHeight,
-			"layer_count":  req.LayerCount,
-			"material":     req.Material,
-			"smt_required": req.SMTRequired,
-			"customer_id":  userID,
-			"created_at":   time.Now().Format(time.RFC3339),
-		},
-	})
-}
-func (h *OrderHandler) ListOrders(c *gin.Context) {
-	userID := c.GetString("user_id")
+	order := domain.Order{
+		ID:          utils.GenerateUUID(),
+		Title:       req.Title,
+		Description: req.Description,
+		Status:      string(domain.StatusDraft),
+		PCBQuantity: req.PCBQuantity,
+		PCBWidth:    req.PCBWidth,
+		PCBHeight:   req.PCBHeight,
+		LayerCount:  req.LayerCount,
+		SMTRequired: req.SMTRequired,
+		Material:    req.Material,                    // см. пункт 2
+		CreatedAt:   time.Now().Format(time.RFC3339), // можно перезаписать значением из БД
+	}
 
-	orders, err := h.repo.ListByUser(userID)
-	if err != nil {
-		c.JSON(500, gin.H{"error": "Failed to load orders"})
+	if err := h.repo.Create(c.Request.Context(), userID, &order); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create order"})
 		return
 	}
 
-	c.JSON(200, orders)
+	// Лучше вернуть сам заказ — фронту проще получить order.id
+	c.JSON(http.StatusCreated, order)
 }
-
-func (h *OrderHandler) UploadOrderFile(c *gin.Context) {
-	orderID := c.Param("id")
+func (h *OrderHandler) ListOrders(c *gin.Context) {
 	userID := c.GetString("user_id")
-
 	if userID == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
 		return
 	}
 
-	// Проверяем, что orderID не пустой
-	if orderID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Order ID is required"})
-		return
-	}
-
-	file, header, err := c.Request.FormFile("file")
+	orders, err := h.repo.ListByUser(userID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "File upload required: " + err.Error()})
-		return
-	}
-	defer file.Close()
-
-	// Проверка типа файла
-	ext := filepath.Ext(header.Filename)
-	allowedTypes := map[string]bool{
-		".zip": true, ".rar": true, ".7z": true,
-		".gbr": true, ".ger": true, ".xlsx": true, ".csv": true, ".txt": true,
-	}
-	if !allowedTypes[ext] {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "File type not allowed. Allowed: .zip, .rar, .7z, .gbr, .ger, .xlsx, .csv, .txt"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load orders"})
 		return
 	}
 
-	// Ограничение размера файла (50MB)
-	if header.Size > 50*1024*1024 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "File too large. Max 50MB"})
+	c.JSON(http.StatusOK, orders)
+}
+
+func (h *OrderHandler) ListOrderFiles(c *gin.Context) {
+	orderID := c.Param("id")
+
+	files, err := h.fileRepo.ListByOrder(c.Request.Context(), orderID)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed to load files"})
 		return
 	}
 
-	// Вычисление SHA256
+	c.JSON(200, files)
+
+}
+
+func (h *OrderHandler) UploadOrderFile(c *gin.Context) {
+	orderID := c.Param("id")
+
+	file, err := c.FormFile("file")
+	if err != nil {
+		c.JSON(400, gin.H{"error": "file required"})
+		return
+	}
+
+	if file.Size > 50*1024*1024 {
+		c.JSON(400, gin.H{"error": "file too large"})
+		return
+	}
+
+	description := c.PostForm("description")
+	fileType := c.PostForm("type")
+	if fileType == "" {
+		fileType = "other"
+	}
+
+	// 1) Создаём папку uploads/orders/<orderID>/
+	dir := filepath.Join("uploads", "orders", orderID)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		c.JSON(500, gin.H{"error": "cannot create upload dir"})
+		return
+	}
+
+	// 2) Безопасное имя файла
+	filename := filepath.Base(file.Filename)
+	localPath := filepath.Join(dir, filename)
+
+	// 3) Сохраняем multipart-файл на диск
+	if err := c.SaveUploadedFile(file, localPath); err != nil {
+		c.JSON(500, gin.H{"error": "cannot save file"})
+		return
+	}
+
+	// 4) Считаем sha256 и размер из сохранённого файла
+	f, err := os.Open(localPath)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "cannot open saved file"})
+		return
+	}
+	defer f.Close()
+
 	hasher := sha256.New()
-	if _, err := io.Copy(hasher, file); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process file: " + err.Error()})
-		return
-	}
-	fileHash := hex.EncodeToString(hasher.Sum(nil))
-
-	// Сброс позиции файла
-	if _, err := file.Seek(0, 0); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reset file pointer: " + err.Error()})
-		return
-	}
-
-	// Сохранение в локальную файловую систему
-	uploadDir := fmt.Sprintf("./uploads/orders/%s", orderID)
-	if err := os.MkdirAll(uploadDir, 0755); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create upload directory: " + err.Error()})
-		return
-	}
-
-	filePath := fmt.Sprintf("%s/%s", uploadDir, header.Filename)
-	dst, err := os.Create(filePath)
+	n, err := io.Copy(hasher, f)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create file: " + err.Error()})
+		c.JSON(500, gin.H{"error": "cannot hash file"})
 		return
 	}
-	defer dst.Close()
+	sha := hex.EncodeToString(hasher.Sum(nil))
 
-	if _, err := io.Copy(dst, file); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file: " + err.Error()})
+	// 5) Пишем в БД (FileURL = URL для скачивания через /uploads/...)
+	publicURL := "/" + filepath.ToSlash(localPath)
+
+	orderFile := domain.OrderFile{
+		ID:          utils.GenerateUUID(),
+		OrderID:     orderID,
+		Filename:    filename,
+		FileType:    fileType,
+		Description: description,
+		FileURL:     publicURL,
+		FileSize:    n,
+		SHA256:      sha,
+	}
+
+	if err := h.fileRepo.Save(c.Request.Context(), &orderFile); err != nil {
+		c.JSON(500, gin.H{"error": "db save failed", "details": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"file_id":  fmt.Sprintf("file-%d", time.Now().UnixNano()),
-		"filename": header.Filename,
-		"hash":     fileHash,
-		"size":     header.Size,
-		"path":     filePath,
-		"order_id": orderID,
-		"message":  "File uploaded successfully",
-	})
+	c.JSON(201, orderFile)
 }

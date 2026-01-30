@@ -53,8 +53,15 @@ func main() {
 	authSvc := service.NewAuthService(userRepo, refreshRepo, cfg.JWTSecret)
 
 	authHandler := handler.NewAuthHandler(authSvc)
+
+	// --- Orders repositories ---
 	orderRepo := postgres.NewOrderRepo(db)
-	orderHandler := handler.NewOrderHandler(orderRepo)
+	orderFileRepo := postgres.NewOrderFileRepo(db)
+
+	// --- S3 Config ---
+
+	// --- Order Handler ---
+	orderHandler := handler.NewOrderHandler(orderRepo, orderFileRepo)
 
 	// factoryHandler := handler.NewFactoryHandler() // пока закомментируем
 
@@ -88,6 +95,7 @@ func main() {
 		// protected.GET("/orders/:id", orderHandler.GetOrder)
 		// protected.PUT("/orders/:id/status", orderHandler.UpdateOrderStatus)
 		protected.POST("/orders/:id/files", orderHandler.UploadOrderFile)
+		protected.GET("/orders/:id/files", orderHandler.ListOrderFiles)
 
 		// Для заводов (пока закомментируем)
 		// protected.GET("/factory/orders", factoryHandler.ListAvailableOrders)
@@ -107,6 +115,7 @@ func main() {
 
 	// Статические файлы (для фронтенда, если нужно)
 	router.Static("/static", "./static")
+	router.Static("/uploads", "./uploads")
 
 	// Serve frontend (опционально)
 	router.GET("/", func(c *gin.Context) {

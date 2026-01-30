@@ -8,11 +8,6 @@
     <link rel="stylesheet" href="css/login.css">
 </head>
 <body>
-    <!-- Переключатель темы -->
-    <button class="theme-toggle" id="themeToggle">
-        <i class="fas fa-moon"></i>
-    </button>
-
     <div class="auth-page">
         <!-- Левая часть с изображением -->
         <div class="image-section">
@@ -67,11 +62,16 @@
 
                     <div class="form-group">
                         <label for="country" class="form-label">Country</label>
-                        <div class="input-container">
-                            <input type="text" id="country" class="form-input" placeholder="Enter your country" required>
-                            <div class="input-icon">
-                                <i class="fas fa-globe"></i>
-                            </div>
+                        <div class="select_wrapper">
+                            <i class="fas fa-globe"></i>
+                            <select class="country_selection" id="country" name="country">
+                                <option value="" disabled selected hidden>Select your country...</option>
+                                <option value="Armenia" data-icon="🇦🇲">Armenia</option>
+                                <option value="Germany" data-icon="🇩🇪">Germany</option>
+                                <option value="Ukraine" data-icon="🇺🇦">Ukraine</option>
+                                <option value="USA" data-icon="🇺🇸">United States</option>
+                                <option value="Australia" data-icon="🇦🇺">Australia</option>
+                            </select>
                         </div>
                     </div>
 
@@ -104,9 +104,13 @@
                 </div>
 
                 <div class="auth-footer">
-                    <p>Already have an account?
+                    <p>
+                        <a href="index.html" class="GoBack">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </a>
+                        Already have an account?
                         <a href="login.html" style="text-decoration: none;">
-                            Sign in
+                            Sign In
                         </a>
                     </p>
                 </div>
@@ -117,35 +121,6 @@
 <script src="js/auth.js"></script>
 
     <script>
-        // Переключение темы
-        const themeToggle = document.getElementById('themeToggle');
-        const themeIcon = themeToggle.querySelector('i');
-        
-        themeToggle.addEventListener('click', () => {
-            const html = document.documentElement;
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            
-            html.setAttribute('data-theme', newTheme);
-            themeIcon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-            
-            // Сохраняем в localStorage
-            localStorage.setItem('theme', newTheme);
-            
-            // Анимация переключения
-            themeToggle.style.transform = 'rotate(360deg)';
-            setTimeout(() => {
-                themeToggle.style.transform = '';
-            }, 300);
-        });
-        
-        // Проверяем сохраненную тему
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            themeIcon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-        });
-        
         // Обработка формы
         document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();

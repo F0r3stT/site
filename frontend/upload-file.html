@@ -146,6 +146,7 @@
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="js/config.js"></script>
 </head>
 <body>
     <div class="container">
@@ -181,12 +182,12 @@
         
         <div id="message" class="message"></div>
         
-        <a href="/static/index.html" class="back-link">← Back to API Testing</a>
-        <a href="/static/create-order.html" class="back-link">Create New Order →</a>
+        <a href="index.html" class="back-link">← Back to API Testing</a>
+        <a href="create-order.html" class="back-link">Create New Order →</a>
     </div>
 
     <script>
-        const API_BASE = '/api/v1';
+        //const API_BASE = '/api/v1';
         let selectedFiles = [];
         let orderId = '';
         
@@ -208,7 +209,8 @@
                 }
             }
             
-            authStatus.innerHTML = '❌ Not logged in. <a href="/static/login.html" style="color: #2563eb;">Login first</a>';
+            authStatus.innerHTML = '❌ Not logged in. <a href="login.html" style="color: #2563eb;">Login first</a>';
+
             authInfo.style.background = '#fee2e2';
             return null;
         }
@@ -329,7 +331,7 @@
             const token = checkAuth();
             if (!token) {
                 alert('Please login first!');
-                window.location.href = '/static/login.html';
+                window.location.href = 'login.html';
                 return;
             }
             
@@ -364,8 +366,11 @@
                     const file = selectedFiles[i];
                     const formData = new FormData();
                     formData.append('file', file);
-                    
-                    const response = await fetch(`${API_BASE}/orders/${orderId}/files`, {
+                    console.log("UPLOAD URL:", `${API_BASE_URL}/orders/${orderId}/files`);
+console.log("FILES:", selectedFiles);
+
+                    const response = await fetch(`${API_BASE_URL}/orders/${orderId}/files`, {
+
                         method: 'POST',
                         headers: {
                             'Authorization': `Bearer ${token}`

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PCB Marketplace Armenia - Find PCB & SMT Manufacturers</title>
+    <title>Tangram</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,7 +16,7 @@
         <nav class="header-content">
             <a href="/" class="logo">
                 <i class="fas fa-microchip"></i>
-                <span>CircuitWorks</span>
+                <span>Tangram</span>
             </a>
             
             <div class="nav-links">
@@ -25,7 +25,7 @@
                 <!--<a href="#production" class="nav-link">Our Production</a>
                 <a href="#quality" class="nav-link">Quality</a>-->
                 <a href="#factories" class="nav-link">Factories</a>
-                <a href="#pricing" class="nav-link">Pricing</a>
+                <a href="#contact" class="nav-link">Contact</a>
                 
                 <div class="user-menu" id="user-menu" style="display: none;">
                     <div class="user-info">
@@ -62,10 +62,6 @@
                         Sign Up
                     </button>
                 </div>
-                                <!-- Новый переключатель темы в правом верхнем углу -->
-            <button class="theme-toggle-auth" id="themeToggle">
-                <i class="fas fa-moon"></i>
-            </button>
             </div>
             
 
@@ -89,7 +85,7 @@
         
                         <div class="hero__actions">
                             <a href="register.html" class="btn btn--primary">Start Your Order</a>
-                            <a href="#" class="btn btn--secondary">For Manufacturers</a>
+                            <a href="#production" class="btn btn--secondary">More about Manufacturing</a>
                         </div>
                     </div>
                     <div class="hero__visual">
@@ -297,91 +293,34 @@
                 </div>
             </div>
         </section>
-
-        <!-- Dashboard Section (показывается только авторизованным) -->
-        <section class="dashboard-section" id="dashboard-section" style="display: none;">
+        <section class="section" id="contact">
             <div class="container">
-                <div class="dashboard-header">
-                    <h2 class="section-title">Your Dashboard</h2>
-                    <div class="dashboard-actions">
-                        <button class="btn btn-primary" onclick="showCreateOrderModal()">
-                            <i class="fas fa-plus"></i> New Order
-                        </button>
-                        <button class="btn btn-outline" onclick="refreshOrders()">
-                            <i class="fas fa-sync-alt"></i> Refresh
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Табы -->
-                <div class="tabs">
-                    <button class="tab-btn active" onclick="switchTab('my-orders')">
-                        <i class="fas fa-list"></i> My Orders
-                    </button>
-                    <button class="tab-btn" onclick="switchTab('available-orders')">
-                        <i class="fas fa-industry"></i> Available Orders
-                    </button>
-                    <button class="tab-btn" onclick="switchTab('messages')">
-                        <i class="fas fa-envelope"></i> Messages
-                        <span class="badge" id="message-count">0</span>
-                    </button>
-                </div>
-                
-                <!-- Контент табов -->
-                <div class="tab-content" id="my-orders">
-                    <div class="orders-container" id="orders-container">
-                        <!-- Заказы загружаются динамически -->
-                        <div class="order-card">
-                            <div class="order-header">
-                                <h3 class="order-title">RF Board Prototype</h3>
-                                <span class="order-status status-in_production">In Production</span>
-                            </div>
-                            <div class="order-meta">
-                                <span class="order-tag"><i class="fas fa-layer-group"></i> 4 Layers</span>
-                                <span class="order-tag"><i class="fas fa-ruler-combined"></i> 100x80mm</span>
-                                <span class="order-tag"><i class="fas fa-industry"></i> 5 units</span>
-                            </div>
-                            <p>High frequency RF board for communication device prototype.</p>
-                            <div class="order-actions">
-                                <button class="btn btn-outline btn-sm"><i class="fas fa-eye"></i> View</button>
-                                <button class="btn btn-outline btn-sm"><i class="fas fa-download"></i> Files</button>
+                <div left polya input>
+                    <div class="form-group">
+                        <label for="username" class="form-label">Email Address</label>
+                        <div class="input-container">
+                            <input type="text" id="username" class="form-input" placeholder="Enter your email" required>
+                            <div class="input-icon">
+                                <i class="fas fa-user"></i>
                             </div>
                         </div>
-                        
-                        <div class="order-card">
-                            <div class="order-header">
-                                <h3 class="order-title">Power Management Board</h3>
-                                <span class="order-status status-completed">Completed</span>
-                            </div>
-                            <div class="order-meta">
-                                <span class="order-tag"><i class="fas fa-layer-group"></i> 2 Layers</span>
-                                <span class="order-tag"><i class="fas fa-ruler-combined"></i> 60x40mm</span>
-                                <span class="order-tag"><i class="fas fa-industry"></i> 50 units</span>
-                            </div>
-                            <p>Power management circuit for IoT device with battery charging.</p>
-                            <div class="order-actions">
-                                <button class="btn btn-outline btn-sm"><i class="fas fa-eye"></i> View</button>
-                                <button class="btn btn-outline btn-sm"><i class="fas fa-file-invoice"></i> Invoice</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-container">
+                            <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
+                            <div class="input-icon">
+                                <i class="fas fa-lock"></i>
                             </div>
                         </div>
                     </div>
                 </div>
-                
-                <div class="tab-content" id="available-orders" style="display: none;">
-                    <div class="filters">
-                        <select id="order-filter" class="filter-select">
-                            <option value="all">All Orders</option>
-                            <option value="pcb">PCB Only</option>
-                            <option value="smt">PCB + SMT</option>
-                            <option value="urgent">Urgent</option>
-                        </select>
-                        <input type="text" id="search-orders" class="search-input" placeholder="Search orders...">
-                    </div>
-                    <div class="orders-container" id="available-orders-container">
-                        <!-- Доступные заказы загружаются динамически -->
-                    </div>
+                <div>
+                    right text
                 </div>
             </div>
+            <p>СВязь</p>
         </section>
     </main>
 
@@ -394,21 +333,12 @@
                     <p>Connecting innovators with manufacturers in Armenia's electronics industry.</p>
                 </div>
                 <div class="footer-section">
-                    <h3>Services</h3>
-                    <ul class="footer-links">
-                        <li><a href="#services">PCB Fabrication</a></li>
-                        <li><a href="#services">SMT Assembly</a></li>
-                        <li><a href="#services">DFM Analysis</a></li>
-                        <li><a href="#quality">Quality Testing</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
                     <h3>Company</h3>
                     <ul class="footer-links">
                         <li><a href="#production">Our Production</a></li>
                         <li><a href="#factories">Factories</a></li>
                         <li><a href="#pricing">Pricing</a></li>
-                        <li><a href="#">Contact</a></li>
+                        <li><a href="#contact">Contact</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
@@ -422,7 +352,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 CircuitWorks. All rights reserved. Connecting Armenian electronics manufacturing.</p>
+                <p>&copy; 2026 Tangram. All rights reserved. Connecting Armenian electronics manufacturing.</p>
             </div>
         </div>
     </footer>
@@ -707,42 +637,6 @@
     </style>
 
     <script>
-        // Переключение темы (новая версия с кружком)
-        const themeToggle = document.getElementById('themeToggle');
-        const themeIcon = themeToggle.querySelector('i');
-        
-        themeToggle.addEventListener('click', () => {
-            const html = document.documentElement;
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            
-            html.setAttribute('data-theme', newTheme);
-            themeIcon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-            
-            // Сохраняем в localStorage
-            localStorage.setItem('theme', newTheme);
-            
-            // Анимация переключения
-            themeToggle.style.transform = 'rotate(360deg)';
-            setTimeout(() => {
-                themeToggle.style.transform = '';
-            }, 300);
-        });
-        
-        // Проверка сохраненной темы
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            themeIcon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-            
-            // Показ/скрытие дашборда (имитация авторизации)
-            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-            if (isLoggedIn) {
-                document.getElementById('dashboard-section').style.display = 'block';
-                document.getElementById('user-menu').style.display = 'flex';
-                document.getElementById('auth-buttons').style.display = 'none';
-            }
-            
             // Анимация при скролле для хедера
             window.addEventListener('scroll', () => {
                 const header = document.querySelector('.header');
@@ -792,7 +686,6 @@
                     }
                 });
             });
-        });
         
         // Переключение табов в дашборде
         function switchTab(tabId) {
