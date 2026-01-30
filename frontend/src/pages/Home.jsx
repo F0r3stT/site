@@ -1,241 +1,307 @@
-import React from 'react';
+// src/pages/Home.jsx
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/home.css';
 
-
 const Home = () => {
+  useEffect(() => {
+    // Анимация для элементов при скролле
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-in');
+        }
+      });
+    }, observerOptions);
+
+    // Наблюдаем за элементами с анимацией
+    document.querySelectorAll('.animate-on-scroll').forEach(el => {
+      observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="home-page">
-      {/* Hero Section */}
-      <section className="hero" id="hero">
-        <div className="hero_frame">
-          <div className="hero__inner">
-            <div className="hero__content">
-              <h1>PCB & SMT Manufacturing Marketplace</h1>
-              <p>
-                Connect with trusted PCB manufacturers and SMT assembly
-                lines in Armenia. From prototype to production.
-              </p>
-              <div className="hero__actions">
-                <Link to="/register" className="btn btn--primary">Start Your Order</Link>
-                <a href="#production" className="btn btn--secondary">More about Manufacturing</a>
-              </div>
+      {/* Hero Section - точно как на изображении */}
+      <section className="hero">
+        <div className="hero-container">
+          <div className="hero-content slide-up">
+            <h1>PCB & SMT Manufacturing Marketplace</h1>
+            <p className="hero-subtitle">
+              Connect with trusted PCB manufacturers and SMT assembly lines in Armenia. 
+              From prototype to production.
+            </p>
+            <div className="hero-actions">
+              <Link to="/register" className="btn btn-primary scale-in" style={{animationDelay: '0.2s'}}>
+                Start Your Order
+              </Link>
+              <a href="#manufacturing" className="btn btn-secondary scale-in" style={{animationDelay: '0.3s'}}>
+                More about Manufacturing
+              </a>
             </div>
-            <div className="hero__visual">
-              <img src="/resources/PCBFR.png" alt="Manufacturing illustration" />
+          </div>
+          <div className="hero-image slide-up" style={{animationDelay: '0.1s'}}>
+            <img src="/resources/PCBFR.png" alt="PCB Manufacturing" />
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section - точно как на изображении */}
+      <section className="how-it-works" id="how-it-works">
+        <div className="container">
+          <h2 className="section-title slide-up">How It Works</h2>
+          <div className="steps-grid">
+            <div className="step-card animate-on-scroll" style={{animationDelay: '0.1s'}}>
+              <div className="step-icon">
+                <i className="fas fa-upload"></i>
+              </div>
+              <h3>Upload Your Design</h3>
+              <p>Upload Gerber, BOM, Pick & Place files. Our system validates your design automatically.</p>
+            </div>
+            
+            <div className="step-card animate-on-scroll" style={{animationDelay: '0.2s'}}>
+              <div className="step-icon">
+                <i className="fas fa-search"></i>
+              </div>
+              <h3>Find Manufacturers</h3>
+              <p>Our platform matches your requirements with qualified PCB/SMT factories in Armenia.</p>
+            </div>
+            
+            <div className="step-card animate-on-scroll" style={{animationDelay: '0.3s'}}>
+              <div className="step-icon">
+                <i className="fas fa-file-invoice-dollar"></i>
+              </div>
+              <h3>Receive Quotes</h3>
+              <p>Get competitive quotes with lead times from multiple manufacturers.</p>
+            </div>
+            
+            <div className="step-card animate-on-scroll" style={{animationDelay: '0.4s'}}>
+              <div className="step-icon">
+                <i className="fas fa-truck-fast"></i>
+              </div>
+              <h3>Production & Delivery</h3>
+              <p>Track production progress in real-time and receive your boards on time.</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="features-section" id="features">
+      {/* Advanced PCB Manufacturing Section - точно как на изображении */}
+      <section className="manufacturing-section" id="manufacturing">
         <div className="container">
-          <h2 className="section-title">How It Works</h2>
-          <div className="features-grid">
-            {featuresData.map((feature, index) => (
-              <div key={index} className="feature-card">
-                <div className="feature-icon">
-                  <i className={feature.icon}></i>
+          <div className="manufacturing-content">
+            <div className="manufacturing-image animate-on-scroll" style={{animationDelay: '0.1s'}}>
+              <img src="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2070&auto=format&fit=crop" alt="PCB Manufacturing" />
+            </div>
+            <div className="manufacturing-text">
+              <h2 className="section-title slide-up">Advanced PCB Manufacturing</h2>
+              
+              <div className="manufacturing-features">
+                <div className="manufacturing-feature animate-on-scroll" style={{animationDelay: '0.2s'}}>
+                  <i className="fas fa-layer-group"></i>
+                  <div>
+                    <h3>Multi-Layer Technology</h3>
+                    <p>From 2 to 32 layers with precise layer alignment and impedance control.</p>
+                  </div>
                 </div>
-                <h3>{feature.title}</h3>
-                <p>{feature.description}</p>
+                
+                <div className="manufacturing-feature animate-on-scroll" style={{animationDelay: '0.3s'}}>
+                  <i className="fas fa-bolt"></i>
+                  <div>
+                    <h3>High-Speed Design</h3>
+                    <p>Specialized in RF and high-frequency boards with controlled impedance.</p>
+                  </div>
+                </div>
+                
+                <div className="manufacturing-feature animate-on-scroll" style={{animationDelay: '0.4s'}}>
+                  <i className="fas fa-industry"></i>
+                  <div>
+                    <h3>Automated Production</h3>
+                    <p>State-of-the-art automated lines ensuring consistency and quality.</p>
+                  </div>
+                </div>
+                
+                <div className="manufacturing-feature animate-on-scroll" style={{animationDelay: '0.5s'}}>
+                  <i className="fas fa-leaf"></i>
+                  <div>
+                    <h3>Eco-Friendly Processes</h3>
+                    <p>Environmentally conscious manufacturing with reduced chemical usage.</p>
+                  </div>
+                </div>
               </div>
-            ))}
+              
+              <button className="btn btn-primary scale-in" style={{animationDelay: '0.6s'}}>
+                Start Manufacturing
+              </button>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Production Sections */}
-      <ProductionSection
-        id="production"
-        imageLeft={true}
-        title="Advanced PCB Manufacturing"
-        imageSrc="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2070&auto=format&fit=crop"
-        features={productionFeatures}
-      />
-
-      {/* Services Section */}
-      <section className="order-types-section" id="services">
+      {/* Manufacturing Services Section - точно как на изображении */}
+      <section className="services-section" id="services">
         <div className="container">
-          <h2 className="section-title">Manufacturing Services</h2>
+          <h2 className="section-title slide-up">Manufacturing Services</h2>
           <div className="services-grid">
-            {servicesData.map((service, index) => (
-              <div key={index} className="service-card">
-                <div className="service-header">
-                  <i className={service.icon}></i>
-                  <h3>{service.title}</h3>
-                </div>
-                <ul className="service-features">
-                  {service.features.map((feature, idx) => (
-                    <li key={idx}>
-                      <i className="fas fa-check"></i> {feature}
-                    </li>
-                  ))}
-                </ul>
-                <button className="btn btn-outline">
-                  {service.buttonText}
-                </button>
+            <div className="service-card animate-on-scroll" style={{animationDelay: '0.1s'}}>
+              <div className="service-header">
+                <i className="fas fa-microchip"></i>
+                <h3>PCB Fabrication</h3>
               </div>
-            ))}
+              <ul className="service-features">
+                <li><i className="fas fa-check"></i> 1-32 Layer PCBs</li>
+                <li><i className="fas fa-check"></i> FR-4, Rogers, Aluminum</li>
+                <li><i className="fas fa-check"></i> HDI & Impedance Control</li>
+                <li><i className="fas fa-check"></i> ENIG, HASL, Immersion Silver</li>
+              </ul>
+              <button className="btn btn-outline">Order PCB Only</button>
+            </div>
+            
+            <div className="service-card animate-on-scroll" style={{animationDelay: '0.2s'}}>
+              <div className="service-header">
+                <i className="fas fa-robot"></i>
+                <h3>SMT Assembly</h3>
+              </div>
+              <ul className="service-features">
+                <li><i className="fas fa-check"></i> Full Turnkey Assembly</li>
+                <li><i className="fas fa-check"></i> BGA, QFN, 0201 Components</li>
+                <li><i className="fas fa-check"></i> AOI & X-Ray Inspection</li>
+                <li><i className="fas fa-check"></i> Functional Testing</li>
+              </ul>
+              <button className="btn btn-outline">Order PCB + SMT</button>
+            </div>
+            
+            <div className="service-card animate-on-scroll" style={{animationDelay: '0.3s'}}>
+              <div className="service-header">
+                <i className="fas fa-tools"></i>
+                <h3>DFM Optimization</h3>
+              </div>
+              <ul className="service-features">
+                <li><i className="fas fa-check"></i> Design for Manufacturing</li>
+                <li><i className="fas fa-check"></i> Cost Reduction Analysis</li>
+                <li><i className="fas fa-check"></i> Yield Improvement</li>
+                <li><i className="fas fa-check"></i> Expert Consultation</li>
+              </ul>
+              <button className="btn btn-outline">Request DFM Review</button>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Quality Section */}
-      <ProductionSection
-        id="quality"
-        imageLeft={false}
-        title="Quality Assurance & Testing"
-        imageSrc="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=2074&auto=format&fit=crop"
-        metrics={qualityMetrics}
-        features={qualityFeatures}
-      />
+      {/* Quality Assurance Section - точно как на изображении */}
+      <section className="quality-section" id="factories">
+        <div className="container">
+          <div className="quality-content">
+            <div className="quality-text">
+              <h2 className="section-title slide-up">Quality Assurance & Testing</h2>
+              
+              <div className="quality-metrics">
+                <div className="quality-metric animate-on-scroll" style={{animationDelay: '0.1s'}}>
+                  <div className="metric-value">99.8%</div>
+                  <div className="metric-label">First-Pass Yield</div>
+                </div>
+                <div className="quality-metric animate-on-scroll" style={{animationDelay: '0.2s'}}>
+                  <div className="metric-value">100%</div>
+                  <div className="metric-label">AOI Inspection</div>
+                </div>
+                <div className="quality-metric animate-on-scroll" style={{animationDelay: '0.3s'}}>
+                  <div className="metric-value">24/7</div>
+                  <div className="metric-label">Process Monitoring</div>
+                </div>
+                <div className="quality-metric animate-on-scroll" style={{animationDelay: '0.4s'}}>
+                  <div className="metric-value">IPC-A-610</div>
+                  <div className="metric-label">Quality Standard</div>
+                </div>
+              </div>
+              
+              <div className="quality-features">
+                <div className="quality-feature animate-on-scroll" style={{animationDelay: '0.5s'}}>
+                  <i className="fas fa-search"></i>
+                  <div>
+                    <h3>Automated Optical Inspection</h3>
+                    <p>High-resolution AOI systems detect even the smallest defects.</p>
+                  </div>
+                </div>
+                <div className="quality-feature animate-on-scroll" style={{animationDelay: '0.6s'}}>
+                  <i className="fas fa-x-ray"></i>
+                  <div>
+                    <h3>X-Ray Inspection</h3>
+                    <p>For BGA and hidden solder joints, ensuring perfect connections.</p>
+                  </div>
+                </div>
+                <div className="quality-feature animate-on-scroll" style={{animationDelay: '0.7s'}}>
+                  <i className="fas fa-vial"></i>
+                  <div>
+                    <h3>Material Testing</h3>
+                    <p>Regular testing of raw materials to ensure consistency.</p>
+                  </div>
+                </div>
+                <div className="quality-feature animate-on-scroll" style={{animationDelay: '0.8s'}}>
+                  <i className="fas fa-chart-line"></i>
+                  <div>
+                    <h3>Statistical Process Control</h3>
+                    <p>Real-time monitoring and control of all manufacturing parameters.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="quality-image animate-on-scroll" style={{animationDelay: '0.1s'}}>
+              <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=2074&auto=format&fit=crop" alt="Quality Inspection" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section className="contact-section" id="contact">
+        <div className="container">
+          <h2 className="section-title slide-up">Contact Us</h2>
+          <div className="contact-content">
+            <div className="contact-info animate-on-scroll" style={{animationDelay: '0.1s'}}>
+              <h3>Get Started Today</h3>
+              <p>Ready to manufacture your PCBs? Contact us for a consultation or start your order directly.</p>
+              <div className="contact-details">
+                <div className="contact-item">
+                  <i className="fas fa-envelope"></i>
+                  <span>contact@tangram.am</span>
+                </div>
+                <div className="contact-item">
+                  <i className="fas fa-phone"></i>
+                  <span>+374 10 123456</span>
+                </div>
+                <div className="contact-item">
+                  <i className="fas fa-map-marker-alt"></i>
+                  <span>Yerevan, Armenia</span>
+                </div>
+              </div>
+            </div>
+            <div className="contact-form animate-on-scroll" style={{animationDelay: '0.2s'}}>
+              <h3>Send us a message</h3>
+              <form>
+                <div className="form-group">
+                  <input type="text" placeholder="Your Name" />
+                </div>
+                <div className="form-group">
+                  <input type="email" placeholder="Your Email" />
+                </div>
+                <div className="form-group">
+                  <textarea placeholder="Your Message" rows="4"></textarea>
+                </div>
+                <button type="submit" className="btn btn-primary">Send Message</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };
-
-const ProductionSection = ({ id, imageLeft, title, imageSrc, features, metrics }) => {
-  return (
-    <section className={`production-section ${imageLeft ? 'image-left' : 'image-right'}`} id={id}>
-      <div className="container">
-        <div className="production-content">
-          <div className="production-image">
-            <img src={imageSrc} alt={title} />
-            <div className="image-fade"></div>
-          </div>
-          <div className="production-text">
-            <h2 className="section-title">{title}</h2>
-            
-            {metrics && (
-              <div className="quality-metrics">
-                {metrics.map((metric, index) => (
-                  <div key={index} className="metric">
-                    <div className="metric-value">{metric.value}</div>
-                    <div className="metric-label">{metric.label}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-            
-            {features && (
-              <div className="quality-features">
-                {features.map((feature, index) => (
-                  <div key={index} className="quality-feature">
-                    <i className={feature.icon}></i>
-                    <h3>{feature.title}</h3>
-                    <p>{feature.description}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-            
-            <button className="btn btn-primary">
-              Start Manufacturing
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-// Data arrays
-const featuresData = [
-  {
-    icon: 'fas fa-upload',
-    title: 'Upload Your Design',
-    description: 'Upload Gerber, BOM, Pick & Place files. Our system validates your design automatically.'
-  },
-  {
-    icon: 'fas fa-search',
-    title: 'Find Manufacturers',
-    description: 'Our platform matches your requirements with qualified PCB/SMT factories in Armenia.'
-  },
-  {
-    icon: 'fas fa-file-invoice-dollar',
-    title: 'Receive Quotes',
-    description: 'Get competitive quotes with lead times from multiple manufacturers.'
-  },
-  {
-    icon: 'fas fa-truck-fast',
-    title: 'Production & Delivery',
-    description: 'Track production progress in real-time and receive your boards on time.'
-  }
-];
-
-const productionFeatures = [
-  {
-    icon: 'fas fa-layer-group',
-    title: 'Multi-Layer Technology',
-    description: 'From 2 to 32 layers with precise layer alignment and impedance control.'
-  },
-  {
-    icon: 'fas fa-bolt',
-    title: 'High-Speed Design',
-    description: 'Specialized in RF and high-frequency boards with controlled impedance.'
-  },
-  {
-    icon: 'fas fa-industry',
-    title: 'Automated Production',
-    description: 'State-of-the-art automated lines ensuring consistency and quality.'
-  },
-  {
-    icon: 'fas fa-leaf',
-    title: 'Eco-Friendly Processes',
-    description: 'Environmentally conscious manufacturing with reduced chemical usage.'
-  }
-];
-
-const servicesData = [
-  {
-    icon: 'fas fa-microchip',
-    title: 'PCB Fabrication',
-    features: ['1-32 Layer PCBs', 'FR-4, Rogers, Aluminum', 'HDI & Impedance Control', 'ENIG, HASL, Immersion Silver'],
-    buttonText: 'Order PCB Only'
-  },
-  {
-    icon: 'fas fa-robot',
-    title: 'SMT Assembly',
-    features: ['Full Turnkey Assembly', 'BGA, QFN, 0201 Components', 'AOI & X-Ray Inspection', 'Functional Testing'],
-    buttonText: 'Order PCB + SMT'
-  },
-  {
-    icon: 'fas fa-tools',
-    title: 'DFM Optimization',
-    features: ['Design for Manufacturing', 'Cost Reduction Analysis', 'Yield Improvement', 'Expert Consultation'],
-    buttonText: 'Request DFM Review'
-  }
-];
-
-const qualityMetrics = [
-  { value: '99.8%', label: 'First-Pass Yield' },
-  { value: '100%', label: 'AOI Inspection' },
-  { value: '24/7', label: 'Process Monitoring' },
-  { value: 'IPC-A-610', label: 'Quality Standard' }
-];
-
-const qualityFeatures = [
-  {
-    icon: 'fas fa-search',
-    title: 'Automated Optical Inspection',
-    description: 'High-resolution AOI systems detect even the smallest defects.'
-  },
-  {
-    icon: 'fas fa-x-ray',
-    title: 'X-Ray Inspection',
-    description: 'For BGA and hidden solder joints, ensuring perfect connections.'
-  },
-  {
-    icon: 'fas fa-vial',
-    title: 'Material Testing',
-    description: 'Regular testing of raw materials to ensure consistency.'
-  },
-  {
-    icon: 'fas fa-chart-line',
-    title: 'Statistical Process Control',
-    description: 'Real-time monitoring and control of all manufacturing parameters.'
-  }
-];
 
 export default Home;
