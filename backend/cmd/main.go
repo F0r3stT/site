@@ -9,7 +9,7 @@ import (
 	"sitecircuitworks/internal/handler"
 	"sitecircuitworks/internal/middleware"
 	"sitecircuitworks/internal/pkg/database"
-	"sitecircuitworks/internal/repository/postgres"
+	"sitecircuitworks/internal/pkg/mailer"
 	pgrepo "sitecircuitworks/internal/repository/postgres"
 	"sitecircuitworks/internal/service"
 
@@ -18,63 +18,96 @@ import (
 )
 
 func main() {
-	// Загрузка переменных окружения
+	// Load env
 	if err := godotenv.Load(".env"); err != nil {
 		log.Println("Warning: .env file not found:", err)
 	}
 
-	// Загрузка конфигурации
 	cfg := config.Load()
 
-	// Настройка режима Gin
 	if cfg.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	// Создание роутера
 	router := gin.New()
 	router.Use(
 		gin.Recovery(),
 		middleware.CORS(),
 		middleware.Logger(),
 	)
+
+	// DB
 	db, err := database.NewPostgres(database.DBConfig{
 		Host: cfg.DB.Host, Port: cfg.DB.Port, User: cfg.DB.User,
 		Password: cfg.DB.Password, DBName: cfg.DB.DBName, SSLMode: cfg.DB.SSLMode,
 	})
-
 	if err != nil {
 		log.Fatal("❌ DB connection failed:", err)
 	}
 	defer db.Close()
 
+	// Repos
 	userRepo := pgrepo.NewUserRepo(db)
 	refreshRepo := pgrepo.NewRefreshTokenRepo(db)
-	authSvc := service.NewAuthService(userRepo, refreshRepo, cfg.JWTSecret)
+	otpRepo := pgrepo.NewLoginOTPRepo(db)
 
+	orderRepo := pgrepo.NewOrderRepo(db)
+	orderFileRepo := pgrepo.NewOrderFileRepo(db)
+
+	// Mailer
+	m, mailErr := mailer.NewFromSMTPConfig(mailer.SMTPConfig{
+		Host:               cfg.SMTP.Host,
+		Port:               cfg.SMTP.Port,
+		User:               cfg.SMTP.User,
+		Pass:               cfg.SMTP.Pass,
+		From:               cfg.SMTP.From,
+		StartTLS:           cfg.SMTP.StartTLS,
+		InsecureSkipVerify: cfg.SMTP.InsecureSkipVerify,
+	})
+	if mailErr != nil {
+		// В production — падаем, чтобы не “сломать” логин.
+		if cfg.OTP.Enabled && cfg.Env == "production" {
+			log.Fatal("OTP enabled but SMTP is not configured:", mailErr)
+		}
+
+		// В dev — фолбэк на консоль
+		log.Println("SMTP not configured, using ConsoleMailer:", mailErr)
+		m = &mailer.ConsoleMailer{}
+	}
+
+	// Services / Handlers
+	authSvc := service.NewAuthService(
+		userRepo,
+		refreshRepo,
+		otpRepo,
+		m,
+		cfg.JWTSecret,
+		service.OTPConfig{
+			Enabled:              cfg.OTP.Enabled,
+			TTLMinutes:           cfg.OTP.TTLMinutes,
+			MaxAttempts:          cfg.OTP.MaxAttempts,
+			ResendCooldownSecond: cfg.OTP.ResendCooldownSecond,
+			MaxSends:             cfg.OTP.MaxSends,
+			Pepper:               cfg.OTP.Pepper,
+		},
+	)
 	authHandler := handler.NewAuthHandler(authSvc)
 
-	// --- Orders repositories ---
-	orderRepo := postgres.NewOrderRepo(db)
-	orderFileRepo := postgres.NewOrderFileRepo(db)
-
-	// --- S3 Config ---
-
-	// --- Order Handler ---
 	orderHandler := handler.NewOrderHandler(orderRepo, orderFileRepo)
 
-	// factoryHandler := handler.NewFactoryHandler() // пока закомментируем
-
-	// Публичные маршруты
+	// Public routes
 	api := router.Group("/api/v1")
 	{
-		// Аутентификация
 		api.POST("/auth/register", authHandler.Register)
 		api.POST("/auth/login", authHandler.Login)
+
+		// OTP login step 2 + resend
+		api.POST("/auth/login/verify", authHandler.LoginVerify)
+		api.POST("/auth/login/resend", authHandler.LoginResend)
+
 		api.POST("/auth/refresh", authHandler.RefreshToken)
 		api.POST("/auth/logout", authHandler.Logout)
 
-		// Публичная информация
 		api.GET("/stats", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{
 				"active_orders":        154,
@@ -84,23 +117,15 @@ func main() {
 		})
 	}
 
-	// Защищенные маршруты
+	// Protected routes
 	protected := api.Group("/")
 	protected.Use(middleware.Auth(cfg.JWTSecret))
 	{
-		// Заказы
 		protected.GET("/orders", orderHandler.ListOrders)
 		protected.POST("/orders", orderHandler.CreateOrder)
 
-		// protected.GET("/orders/:id", orderHandler.GetOrder)
-		// protected.PUT("/orders/:id/status", orderHandler.UpdateOrderStatus)
 		protected.POST("/orders/:id/files", orderHandler.UploadOrderFile)
 		protected.GET("/orders/:id/files", orderHandler.ListOrderFiles)
-
-		// Для заводов (пока закомментируем)
-		// protected.GET("/factory/orders", factoryHandler.ListAvailableOrders)
-
-		// protected.PUT("/offers/:id/accept", factoryHandler.AcceptOffer)
 	}
 
 	// Health check
@@ -113,16 +138,11 @@ func main() {
 		})
 	})
 
-	// Статические файлы (для фронтенда, если нужно)
+	// Static
 	router.Static("/static", "./static")
 	router.Static("/uploads", "./uploads")
 
-	// Serve frontend (опционально)
-	router.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", nil)
-	})
-
-	// Настройка и запуск сервера
+	// Server
 	server := &http.Server{
 		Addr:         ":" + cfg.Port,
 		Handler:      router,
@@ -134,7 +154,6 @@ func main() {
 	log.Printf("🚀 Server starting on http://localhost:%s", cfg.Port)
 	log.Printf("📡 API available at http://localhost:%s/api/v1", cfg.Port)
 	log.Printf("🏥 Health check at http://localhost:%s/health", cfg.Port)
-	log.Printf("🔐 JWT Secret configured: %t", cfg.JWTSecret != "")
 
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatal("❌ Server failed:", err)
