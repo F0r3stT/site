@@ -32,23 +32,25 @@ const Home = () => {
       {/* Hero Section - точно как на изображении */}
       <section className="hero">
         <div className="hero-container">
-          <div className="hero-content slide-up">
-            <h1>PCB & SMT Manufacturing Marketplace</h1>
-            <p className="hero-subtitle">
-              Connect with trusted PCB manufacturers and SMT assembly lines in Armenia. 
-              From prototype to production.
-            </p>
-            <div className="hero-actions">
-              <Link to="/register" className="btn btn-primary scale-in" style={{animationDelay: '0.2s'}}>
-                Start Your Order
-              </Link>
-              <a href="#manufacturing" className="btn btn-secondary scale-in" style={{animationDelay: '0.3s'}}>
-                More about Manufacturing
-              </a>
+          <div className="hero-content-wrapper">
+            <div className="hero-content slide-up">
+              <h1>PCB & SMT Manufacturing Marketplace</h1>
+              <p className="hero-subtitle">
+                Connect with trusted PCB manufacturers and SMT assembly lines in Armenia. 
+                From prototype to production.
+              </p>
+              <div className="hero-actions">
+                <Link to="/register" className="btn btn-primary scale-in" style={{animationDelay: '0.2s'}}>
+                  Start Your Order
+                </Link>
+                <a href="#manufacturing" className="btn btn-secondary scale-in" style={{animationDelay: '0.3s'}}>
+                  More about Manufacturing
+                </a>
+              </div>
             </div>
-          </div>
-          <div className="hero-image slide-up" style={{animationDelay: '0.1s'}}>
-            <img src="/resources/PCBFR.png" alt="PCB Manufacturing" />
+            <div className="hero-image slide-up" style={{animationDelay: '0.1s'}}>
+              <img src="/resources/PCBFR.png" alt="PCB Manufacturing" />
+            </div>
           </div>
         </div>
       </section>
@@ -137,9 +139,9 @@ const Home = () => {
                 </div>
               </div>
               
-              <button className="btn btn-primary scale-in" style={{animationDelay: '0.6s'}}>
+              <Link to="/register" button className="btn btn-primary scale-in" style={{animationDelay: '0.6s'}}>
                 Start Manufacturing
-              </button>
+              </Link>
             </div>
           </div>
         </div>

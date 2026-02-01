@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
+import VerifyLoginModal from "../components/modals/VerifyLoginModal";
 import '../styles/auth.css'; 
 
 const Login = () => {
@@ -9,6 +10,9 @@ const Login = () => {
     password: '',
     remember: false
   });
+  const [otpOpen, setOtpOpen] = useState(false);
+const [challengeId, setChallengeId] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
@@ -30,12 +34,16 @@ const Login = () => {
 
     try {
       const result = await login(formData.email, formData.password);
-      
+
       if (result.success) {
-        navigate('/dashboard');
+        navigate("/dashboard");
+      } else if (result.mfaRequired) {
+        setChallengeId(result.challengeId);
+        setOtpOpen(true);
       } else {
-        setError(result.error || 'Login failed');
+        setError(result.error || "Login failed");
       }
+
     } catch (err) {
       setError('An error occurred. Please try again.');
     } finally {
@@ -109,7 +117,7 @@ const Login = () => {
               </div>
             </div>
 
-            <div className="form-footer">
+            <div className="form-footer otp-actions">
               <label className="checkbox-container">
                 <input
                   type="checkbox"
@@ -160,6 +168,14 @@ const Login = () => {
                 Sign Up
               </Link>
             </p>
+            <VerifyLoginModal
+  open={otpOpen}
+  email={formData.email}
+  challengeId={challengeId}
+  onClose={() => setOtpOpen(false)}
+  onSuccess={() => navigate("/dashboard")}
+/>
+
           </div>
         </div>
       </div>

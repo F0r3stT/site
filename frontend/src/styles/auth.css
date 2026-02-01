@@ -469,3 +469,91 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== OTP Modal (matches auth.css theme) ===== */
+.otp-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 9999;
+}
+
+.otp-modal {
+  width: min(560px, 100%);
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border-soft);
+  overflow: hidden;
+  animation: slideUp 0.25s ease;
+}
+
+.otp-modal-header {
+  padding: 22px 22px 10px;
+}
+
+.otp-modal-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.otp-modal-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.otp-modal-subtitle {
+  margin-top: 8px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.otp-modal-body {
+  padding: 0 22px 22px;
+}
+
+.otp-modal-close {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 2px solid var(--border-soft);
+  background: var(--bg-page);
+  color: var(--text-main);
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 0;
+  transition: var(--transition-smooth);
+}
+
+.otp-modal-close:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+  border-color: var(--primary);
+}
+
+/* кнопки внизу модалки */
+.form-footer.otp-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.form-footer.otp-actions .social-btn,
+.form-footer.otp-actions .auth-btn {
+  flex: 1;
+  width: 100%;
+}
+
+@media (max-width: 576px) {
+  .form-footer.otp-actions {
+    flex-direction: column;
+  }
+}

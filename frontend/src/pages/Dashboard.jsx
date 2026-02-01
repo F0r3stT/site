@@ -2,11 +2,16 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { orderService } from '../services/orderService';
 import CreateOrderModal from '../components/modals/CreateOrderModal';
+import OrderDetailsModal from '../components/modals/OrderDetailsModal';
+
 
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+const [showDetails, setShowDetails] = useState(false);
+
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [stats, setStats] = useState({
     active: 5,
@@ -20,20 +25,27 @@ const Dashboard = () => {
   }, []);
 
   const loadOrders = async () => {
-    try {
-      setLoading(true);
-      const data = await orderService.getUserOrders();
-      setOrders(data);
-    } catch (error) {
-      console.error('Failed to load orders:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    setLoading(true);
+
+    const data = await orderService.getUserOrders();
+
+    // ✅ гарантируем массив
+    setOrders(Array.isArray(data) ? data : (data?.orders || []));
+
+  } catch (error) {
+    console.error("Failed to load orders:", error);
+    setOrders([]); // fallback
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const loadStats = async () => {
     try {
-      const data = await orderService.getStats();
+      const data = await orderService.getOrders();
+        setOrders(Array.isArray(data) ? data : (data.orders || []));
       setStats(data);
     } catch (error) {
       console.error('Failed to load stats:', error);
@@ -127,20 +139,30 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="order-footer">
-                <button className="view-order-btn">
-                  <i className="fas fa-external-link-alt"></i>
-                  View Details
-                </button>
+                <button
+      className="view-order-btn"
+      onClick={() => {
+        setSelectedOrder(order);
+        setShowDetails(true);
+      }}
+    >
+      <i className="fas fa-external-link-alt"></i>
+      View Details
+    </button>
+
               </div>
             </div>
           ))}
         </div>
       )}
 
-      {showCreateModal && (
-        <CreateOrderModal
-          onClose={() => setShowCreateModal(false)}
-          onSubmit={handleCreateOrder}
+            {showDetails && (
+        <OrderDetailsModal
+          order={selectedOrder}
+          onClose={() => {
+            setShowDetails(false);
+            setSelectedOrder(null);
+          }}
         />
       )}
     </div>

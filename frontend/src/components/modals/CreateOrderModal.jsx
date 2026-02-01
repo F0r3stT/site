@@ -82,14 +82,20 @@ const CreateOrderModal = ({ onClose, onSubmit }) => {
     setFiles(prev => prev.filter(f => !(f.name === fileName && f.size === fileSize)));
   };
 
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
+  const numberFields = new Set(['pcb_quantity','pcb_width','pcb_height','layer_count']);
 
+const handleInputChange = (e) => {
+  const { name, value, type, checked } = e.target;
+  setFormData(prev => ({
+    ...prev,
+    [name]:
+      type === 'checkbox'
+        ? checked
+        : numberFields.has(name)
+          ? Number(value)
+          : value
+  }));
+};
   const handleSubmit = async (e) => {
     e.preventDefault();
     setUploading(true);
