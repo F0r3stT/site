@@ -20,6 +20,10 @@ import (
 type OrderRepository interface {
 	ListByUser(userID string) ([]domain.Order, error)
 	Create(ctx context.Context, userID string, o *domain.Order) error
+
+	GetByIDForUser(ctx context.Context, orderID, userID string) (*domain.Order, error)
+	DeleteByUser(ctx context.Context, orderID, userID string) error
+	DeleteAny(ctx context.Context, orderID string) error
 }
 
 type OrderHandler struct {
@@ -179,4 +183,64 @@ func (h *OrderHandler) UploadOrderFile(c *gin.Context) {
 	}
 
 	c.JSON(201, orderFile)
+}
+
+func (h *OrderHandler) DeleteOrder(c *gin.Context) {
+	orderID := c.Param("id")
+	if orderID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "order id required"})
+		return
+	}
+
+	userID := c.GetString("user_id")
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	role := c.GetString("role")
+
+	// admin can delete any order
+	if role == "admin" {
+		if err := h.repo.DeleteAny(c.Request.Context(), orderID); err != nil {
+			if err == postgres.ErrOrderNotFound {
+				c.JSON(http.StatusNotFound, gin.H{"error": "order not found"})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete order"})
+			return
+		}
+
+		_ = os.RemoveAll(filepath.Join("uploads", "orders", orderID))
+		c.Status(http.StatusNoContent)
+		return
+	}
+
+	// customer: can delete only own draft orders
+	order, err := h.repo.GetByIDForUser(c.Request.Context(), orderID, userID)
+	if err != nil {
+		if err == postgres.ErrOrderNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "order not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load order"})
+		return
+	}
+
+	if order.Status != string(domain.StatusDraft) {
+		c.JSON(http.StatusConflict, gin.H{"error": "only draft orders can be deleted"})
+		return
+	}
+
+	if err := h.repo.DeleteByUser(c.Request.Context(), orderID, userID); err != nil {
+		if err == postgres.ErrOrderNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "order not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete order"})
+		return
+	}
+
+	_ = os.RemoveAll(filepath.Join("uploads", "orders", orderID))
+	c.Status(http.StatusNoContent)
 }

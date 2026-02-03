@@ -124,6 +124,8 @@ func main() {
 		protected.GET("/orders", orderHandler.ListOrders)
 		protected.POST("/orders", orderHandler.CreateOrder)
 
+		protected.DELETE("/orders/:id", orderHandler.DeleteOrder)
+
 		protected.POST("/orders/:id/files", orderHandler.UploadOrderFile)
 		protected.GET("/orders/:id/files", orderHandler.ListOrderFiles)
 	}
