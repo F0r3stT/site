@@ -144,7 +144,11 @@ export const AuthProvider = ({ children }) => {
     setPendingChallenge(null);
     setUser(null);
   };
-
+  // В вашем AuthContext добавьте:
+  const updateUser = (updatedUserData) => {
+    setUser(prev => ({ ...prev, ...updatedUserData }));
+    // Сохранить в localStorage, если нужно
+  };
   return (
     <AuthContext.Provider
       value={{

@@ -12,6 +12,8 @@ import Dashboard from './pages/Dashboard';
 import FAQPAGE from './pages/FAQPage';
 import SupportPage from './pages/SupportPage';
 import CreateOrderPage from './pages/CreateOrderPage';
+import ProfileSettings from './pages/ProfileSettings';
+import AdminDashboard from './pages/AdminDashboard';
 
 const skipAuth = import.meta.env.VITE_SKIP_AUTH === 'true';
 
@@ -35,6 +37,12 @@ function App() {
               <Route path='/FAQ' element={<FAQPAGE />} />
               <Route path='/support' element={<SupportPage />} />
               <Route path="/create-order" element={<CreateOrderPage />} />
+              <Route path="/profile" element={<ProfileSettings />} />
+              <Route path="/admin" element={
+                <ProtectedRoute role="admin">
+                    <AdminDashboard />
+                </ProtectedRoute>
+            } />
 
             </Routes>
           </main>

@@ -10,7 +10,6 @@ const Register = () => {
     password: '',
     username: '',
     country: '',
-    role: 'customer',
     company_name: '',
     phone: ''
   });
@@ -158,27 +157,6 @@ const Register = () => {
                   <div className="input-icon">
                     <i className="fas fa-lock"></i>
                   </div>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="role" className="form-label">Role *</label>
-                <div className="select_wrapper">
-                  <i className="fas fa-user-tag"></i>
-                  <select
-                    id="role"
-                    name="role"
-                    className="country_selection"
-                    required
-                    value={formData.role}
-                    onChange={handleChange}
-                  >
-                    <option value="">Select your role</option>
-                    <option value="customer">👤 Customer</option>
-                    <option value="factory">🏭 Factory</option>
-                    <option value="dfm">🔧 DFM Engineer</option>
-                    <option value="admin">⚡ Admin</option>
-                  </select>
                 </div>
               </div>
 
