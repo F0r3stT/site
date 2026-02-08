@@ -10,8 +10,7 @@ const Login = () => {
     password: '',
     remember: false
   });
-  const [otpOpen, setOtpOpen] = useState(false);
-const [challengeId, setChallengeId] = useState("");
+
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -28,28 +27,14 @@ const [challengeId, setChallengeId] = useState("");
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+  e.preventDefault();
 
-    try {
-      const result = await login(formData.email, formData.password);
+  const result = await login(formData.email, formData.password);
+if (result.success) navigate("/dashboard");
+else setError(result.error || "Login failed");
 
-      if (result.success) {
-        navigate("/dashboard");
-      } else if (result.mfaRequired) {
-        setChallengeId(result.challengeId);
-        setOtpOpen(true);
-      } else {
-        setError(result.error || "Login failed");
-      }
+};
 
-    } catch (err) {
-      setError('An error occurred. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="auth-page">
@@ -168,14 +153,7 @@ const [challengeId, setChallengeId] = useState("");
                 Sign Up
               </Link>
             </p>
-            <VerifyLoginModal
-  open={otpOpen}
-  email={formData.email}
-  challengeId={challengeId}
-  onClose={() => setOtpOpen(false)}
-  onSuccess={() => navigate("/dashboard")}
-/>
-
+  
           </div>
         </div>
       </div>

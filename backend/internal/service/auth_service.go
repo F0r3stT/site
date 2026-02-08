@@ -24,6 +24,7 @@ import (
 var (
 	ErrInvalidCredentials = errors.New("invalid credentials")
 	ErrInvalidRefresh     = errors.New("invalid refresh token")
+	ErrEmailNotVerified   = errors.New("email not verified")
 
 	ErrOTPRequired        = errors.New("otp required")
 	ErrOTPInvalid         = errors.New("invalid otp code")
@@ -108,27 +109,72 @@ type RegisterInput struct {
 	Phone       string
 }
 
-func (s *AuthService) Register(ctx context.Context, in RegisterInput) (*domain.User, error) {
+func (s *AuthService) Register(ctx context.Context, in RegisterInput) (RegisterResult, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, err
+		return RegisterResult{}, err
 	}
 
 	u := &domain.User{
-		Email:        in.Email,
-		PasswordHash: string(hash),
-		Role:         in.Role,
-		CompanyName:  in.CompanyName,
-		Country:      in.Country,
-		Phone:        in.Phone,
+		Email:         in.Email,
+		PasswordHash:  string(hash),
+		Role:          in.Role,
+		CompanyName:   in.CompanyName,
+		Country:       in.Country,
+		Phone:         in.Phone,
+		EmailVerified: false, // ✅ по умолчанию не подтвержден
 	}
 
 	if err := s.users.Create(ctx, u); err != nil {
-		return nil, err
+		return RegisterResult{}, err
+	}
+	u.PasswordHash = ""
+
+	// ✅ если OTP выключен — сразу подтверждаем (на будущее)
+	if !s.otpEnabled {
+		_ = s.users.MarkEmailVerified(ctx, u.ID)
+		u.EmailVerified = true
+		return RegisterResult{VerifyRequired: false, User: u}, nil
 	}
 
-	u.PasswordHash = ""
-	return u, nil
+	if s.mail == nil {
+		return RegisterResult{}, ErrOTPSendFailed
+	}
+
+	// на всякий случай инвалидируем старые вызовы (если юзер перерегистрируется в dev)
+	_ = s.otpRepo.ConsumeAllActiveByUser(ctx, u.ID)
+
+	code, err := generate6Digits()
+	if err != nil {
+		return RegisterResult{}, err
+	}
+
+	ch := &domain.LoginOTPChallenge{
+		ID:          utils.GenerateUUID(),
+		UserID:      u.ID,
+		CodeHash:    s.hashOTP(code),
+		ExpiresAt:   time.Now().Add(s.otpTTL),
+		MaxAttempts: s.otpMaxAttempts,
+		SendCount:   1,
+		LastSentAt:  time.Now(),
+	}
+
+	if err := s.otpRepo.Create(ctx, ch); err != nil {
+		return RegisterResult{}, err
+	}
+
+	body := mailer.FormatLoginOTPBody(code, int(s.otpTTL.Minutes()))
+	if err := s.mail.Send(u.Email, "Confirm your email", body); err != nil {
+		_ = s.otpRepo.Consume(ctx, ch.ID)
+		return RegisterResult{}, ErrOTPSendFailed
+	}
+
+	return RegisterResult{
+		VerifyRequired: true,
+		ChallengeID:    ch.ID,
+		ExpiresAt:      ch.ExpiresAt,
+		User:           u,
+	}, nil
 }
 
 type LoginResult struct {
@@ -139,6 +185,12 @@ type LoginResult struct {
 	AccessToken  string
 	RefreshToken string
 	User         *domain.User
+}
+type RegisterResult struct {
+	VerifyRequired bool
+	ChallengeID    string
+	ExpiresAt      time.Time
+	User           *domain.User
 }
 
 // Login: если OTP включён → вернёт MFARequired=true и challenge_id.
@@ -153,62 +205,23 @@ func (s *AuthService) Login(ctx context.Context, email, password, ip, userAgent 
 		return LoginResult{}, ErrInvalidCredentials
 	}
 
+	// ✅ запрещаем вход пока не подтверждена почта
+	if !u.EmailVerified {
+		return LoginResult{}, ErrEmailNotVerified
+	}
+
 	u.PasswordHash = ""
 
-	if !s.otpEnabled {
-		access, refresh, err := s.issueTokens(ctx, u.ID, string(u.Role))
-		if err != nil {
-			return LoginResult{}, err
-		}
-		return LoginResult{
-			MFARequired:  false,
-			AccessToken:  access,
-			RefreshToken: refresh,
-			User:         u,
-		}, nil
-	}
-
-	if s.mail == nil {
-		return LoginResult{}, ErrOTPSendFailed
-	}
-
-	// Инвалидируем старые активные challenges (важно, чтобы не путаться кодами)
-	_ = s.otpRepo.ConsumeAllActiveByUser(ctx, u.ID)
-
-	code, err := generate6Digits()
+	access, refresh, err := s.issueTokens(ctx, u.ID, string(u.Role))
 	if err != nil {
 		return LoginResult{}, err
 	}
-	codeHash := s.hashOTP(code)
-
-	ch := &domain.LoginOTPChallenge{
-		ID:          utils.GenerateUUID(),
-		UserID:      u.ID,
-		CodeHash:    codeHash,
-		ExpiresAt:   time.Now().Add(s.otpTTL),
-		MaxAttempts: s.otpMaxAttempts,
-		SendCount:   1,
-		LastSentAt:  time.Now(),
-		IPAddress:   ip,
-		UserAgent:   userAgent,
-	}
-
-	if err := s.otpRepo.Create(ctx, ch); err != nil {
-		return LoginResult{}, err
-	}
-
-	// Письмо отправляем после записи в БД; если не ушло — “сжигаем” challenge, чтобы не висел
-	body := mailer.FormatLoginOTPBody(code, int(s.otpTTL.Minutes()))
-	if err := s.mail.Send(u.Email, "Your CircuitWorks login code", body); err != nil {
-		_ = s.otpRepo.Consume(ctx, ch.ID)
-		return LoginResult{}, ErrOTPSendFailed
-	}
 
 	return LoginResult{
-		MFARequired: true,
-		ChallengeID: ch.ID,
-		ExpiresAt:   ch.ExpiresAt,
-		User:        u, // можно вернуть user чтобы фронт показал “куда отправили”
+		MFARequired:  false,
+		AccessToken:  access,
+		RefreshToken: refresh,
+		User:         u,
 	}, nil
 }
 
@@ -411,4 +424,102 @@ func generate6Digits() (string, error) {
 	}
 	n := binary.BigEndian.Uint32(b) % 1000000
 	return fmt.Sprintf("%06d", n), nil
+}
+func (s *AuthService) VerifyRegisterOTP(ctx context.Context, challengeID, code string) (accessToken, refreshToken string, user *domain.User, err error) {
+	ch, err := s.otpRepo.GetByID(ctx, challengeID)
+	if err != nil {
+		return "", "", nil, err
+	}
+
+	if ch.ConsumedAt != nil {
+		return "", "", nil, ErrOTPConsumed
+	}
+	if time.Now().After(ch.ExpiresAt) {
+		_ = s.otpRepo.Consume(ctx, ch.ID)
+		return "", "", nil, ErrOTPExpired
+	}
+	if ch.Attempts >= ch.MaxAttempts {
+		_ = s.otpRepo.Consume(ctx, ch.ID)
+		return "", "", nil, ErrOTPTooManyAttempts
+	}
+
+	inHash := s.hashOTP(code)
+	if subtle.ConstantTimeCompare([]byte(inHash), []byte(ch.CodeHash)) != 1 {
+		attempts, _ := s.otpRepo.IncrementAttempts(ctx, ch.ID)
+		if attempts >= ch.MaxAttempts {
+			_ = s.otpRepo.Consume(ctx, ch.ID)
+			return "", "", nil, ErrOTPTooManyAttempts
+		}
+		return "", "", nil, ErrOTPInvalid
+	}
+
+	// consume challenge
+	if err := s.otpRepo.Consume(ctx, ch.ID); err != nil {
+		return "", "", nil, err
+	}
+
+	// ✅ подтверждаем email
+	if err := s.users.MarkEmailVerified(ctx, ch.UserID); err != nil {
+		return "", "", nil, err
+	}
+
+	u, err := s.users.GetByID(ctx, ch.UserID)
+	if err != nil {
+		return "", "", nil, err
+	}
+	u.PasswordHash = ""
+
+	accessToken, refreshToken, err = s.issueTokens(ctx, u.ID, string(u.Role))
+	if err != nil {
+		return "", "", nil, err
+	}
+
+	return accessToken, refreshToken, u, nil
+}
+
+func (s *AuthService) ResendRegisterOTP(ctx context.Context, challengeID string) (time.Time, error) {
+	if !s.otpEnabled {
+		return time.Time{}, errors.New("otp disabled")
+	}
+	if s.mail == nil {
+		return time.Time{}, ErrOTPSendFailed
+	}
+
+	ch, err := s.otpRepo.GetByID(ctx, challengeID)
+	if err != nil {
+		return time.Time{}, err
+	}
+	if ch.ConsumedAt != nil {
+		return time.Time{}, ErrOTPConsumed
+	}
+	if ch.SendCount >= s.otpMaxSends {
+		return time.Time{}, ErrOTPResendLimit
+	}
+	if time.Since(ch.LastSentAt) < s.otpResendCD {
+		return time.Time{}, ErrOTPResendTooSoon
+	}
+
+	u, err := s.users.GetByID(ctx, ch.UserID)
+	if err != nil {
+		return time.Time{}, err
+	}
+
+	code, err := generate6Digits()
+	if err != nil {
+		return time.Time{}, err
+	}
+
+	newExpires := time.Now().Add(s.otpTTL)
+	body := mailer.FormatLoginOTPBody(code, int(s.otpTTL.Minutes()))
+
+	if err := s.mail.Send(u.Email, "Confirm your email (resend)", body); err != nil {
+		return time.Time{}, ErrOTPSendFailed
+	}
+
+	_, err = s.otpRepo.UpdateForResend(ctx, challengeID, s.hashOTP(code), newExpires, time.Now())
+	if err != nil {
+		return time.Time{}, err
+	}
+
+	return newExpires, nil
 }

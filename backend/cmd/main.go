@@ -50,6 +50,9 @@ func main() {
 	userRepo := pgrepo.NewUserRepo(db)
 	refreshRepo := pgrepo.NewRefreshTokenRepo(db)
 	otpRepo := pgrepo.NewLoginOTPRepo(db)
+	// Profile / User service
+	userSvc := service.NewUserService(userRepo)
+	profileHandler := handler.NewProfileHandler(userSvc)
 
 	orderRepo := pgrepo.NewOrderRepo(db)
 	orderFileRepo := pgrepo.NewOrderFileRepo(db)
@@ -100,10 +103,8 @@ func main() {
 	{
 		api.POST("/auth/register", authHandler.Register)
 		api.POST("/auth/login", authHandler.Login)
-
-		// OTP login step 2 + resend
-		api.POST("/auth/login/verify", authHandler.LoginVerify)
-		api.POST("/auth/login/resend", authHandler.LoginResend)
+		api.POST("/auth/register/verify", authHandler.RegisterVerify)
+		api.POST("/auth/register/resend", authHandler.RegisterResend)
 
 		api.POST("/auth/refresh", authHandler.RefreshToken)
 		api.POST("/auth/logout", authHandler.Logout)
@@ -121,6 +122,10 @@ func main() {
 	protected := api.Group("/")
 	protected.Use(middleware.Auth(cfg.JWTSecret))
 	{
+		protected.GET("/profile", profileHandler.GetProfile)
+		protected.PUT("/profile", profileHandler.UpdateProfile)
+		protected.POST("/profile/change-password", profileHandler.ChangePassword)
+
 		protected.GET("/orders", orderHandler.ListOrders)
 		protected.POST("/orders", orderHandler.CreateOrder)
 

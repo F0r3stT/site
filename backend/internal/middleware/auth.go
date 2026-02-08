@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -29,7 +30,11 @@ func Auth(jwtSecret string) gin.HandlerFunc {
 		})
 
 		if err != nil || !token.Valid {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			resp := gin.H{"error": "Invalid token"}
+			if os.Getenv("APP_ENV") != "production" && err != nil {
+				resp["details"] = err.Error()
+			}
+			c.JSON(http.StatusUnauthorized, resp)
 			c.Abort()
 			return
 		}

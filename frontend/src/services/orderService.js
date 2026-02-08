@@ -31,7 +31,10 @@ export const orderService = {
     const response = await api.get('/orders');
     return response.data;
   },
-
+    async deleteOrder(orderId) {
+      const res = await api.delete(`/orders/${orderId}`);
+      return res.data;
+    },
   // ✅ один файл на запрос — как в upload-file.html
   async uploadOrderFile(orderId, file, type) {
     const err = validateFile(file);

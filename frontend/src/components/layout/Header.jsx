@@ -9,7 +9,9 @@ const Header = () => {
   const [scrolled, setScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [activeLink, setActiveLink] = useState('');
+  const [dropdownClosing, setDropdownClosing] = useState(false);
   const dropdownRef = useRef(null);
+  const userInfoRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -17,7 +19,6 @@ const Header = () => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
       
-      // Обновление активной ссылки при скролле
       const sections = ['how-it-works', 'services', 'factories', 'contact'];
       const currentSection = sections.find(section => {
         const element = document.getElementById(section);
@@ -37,20 +38,55 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Закрытие dropdown с правильной анимацией
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setDropdownOpen(false);
+      if (
+        dropdownRef.current && 
+        !dropdownRef.current.contains(event.target) &&
+        userInfoRef.current && 
+        !userInfoRef.current.contains(event.target)
+      ) {
+        closeDropdown();
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape' && dropdownOpen) {
+        closeDropdown();
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    document.addEventListener('keydown', handleEscape);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [dropdownOpen]);
+
+  const toggleDropdown = () => {
+    if (dropdownOpen) {
+      closeDropdown();
+    } else {
+      setDropdownOpen(true);
+      setDropdownClosing(false);
+    }
+  };
+
+  const closeDropdown = () => {
+    setDropdownClosing(true);
+    setTimeout(() => {
+      setDropdownOpen(false);
+      setDropdownClosing(false);
+    }, 150); // Синхронизируем с CSS transition
+  };
 
   const handleLogout = () => {
     logout();
     navigate('/login');
+    closeDropdown();
   };
 
   const toggleTheme = () => {
@@ -136,43 +172,55 @@ const Header = () => {
 
         <div className="header-right">
           {user ? (
-            <div className="user-menu" ref={dropdownRef}>
-              <div className="dropdown">
-                <div 
-                  className="user-info" 
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
+            <div className="user-menu-container">
+              <div 
+                className="user-info"
+                ref={userInfoRef}
+                onClick={toggleDropdown}
+                aria-expanded={dropdownOpen}
+                aria-haspopup="true"
+              >
+                <div className="avatar">
+                  {user.company_name ? user.company_name[0].toUpperCase() : user.email[0].toUpperCase()}
+                </div>
+                <div className="user-details">
+                  <div className="user-name">
+                    {user.company_name || user.email.split('@')[0]}
+                  </div>
+                  <div className="user-role">{user.role || 'user'}</div>
+                </div>
+                <i className={`fas fa-chevron-down dropdown-arrow ${dropdownOpen ? 'rotate-180' : ''}`}></i>
+              </div>
+              
+              <div 
+                className={`dropdown-content ${dropdownOpen ? 'show' : ''} ${dropdownClosing ? 'closing' : ''}`}
+                ref={dropdownRef}
+                aria-hidden={!dropdownOpen}
+              >
+                <Link 
+                  to="/dashboard" 
+                  className="dropdown-item"
+                  onClick={closeDropdown}
                 >
-                  <div className="avatar">
-                    {user.company_name ? user.company_name[0].toUpperCase() : user.email[0].toUpperCase()}
-                  </div>
-                  <div className="user-details">
-                    <div className="user-name">
-                      {user.company_name || user.email.split('@')[0]}
-                    </div>
-                    <div className="user-role">{user.role || 'user'}</div>
-                  </div>
-                  <i className={`fas fa-chevron-down ${dropdownOpen ? 'rotate-180' : ''}`}></i>
-                </div>
-                
-                <div className={`dropdown-content ${dropdownOpen ? 'show' : ''}`}>
-                  <Link to="/dashboard" onClick={() => setDropdownOpen(false)}>
-                    <i className="fas fa-tachometer-alt"></i>
-                    Dashboard
-                  </Link>
-                  <Link to="/profile" onClick={() => setDropdownOpen(false)}>
-                    <i className="fas fa-user"></i>
-                    Profile Settings
-                  </Link>
-                  <div className="dropdown-divider"></div>
-                  <a href="#" onClick={(e) => { 
-                    e.preventDefault(); 
-                    handleLogout(); 
-                    setDropdownOpen(false);
-                  }}>
-                    <i className="fas fa-sign-out-alt"></i>
-                    Logout
-                  </a>
-                </div>
+                  <i className="fas fa-tachometer-alt"></i>
+                  <span>Dashboard</span>
+                </Link>
+                <Link 
+                  to="/profile" 
+                  className="dropdown-item"
+                  onClick={closeDropdown}
+                >
+                  <i className="fas fa-user"></i>
+                  <span>Profile Settings</span>
+                </Link>
+                <div className="dropdown-divider"></div>
+                <button 
+                  className="dropdown-item logout-btn"
+                  onClick={handleLogout}
+                >
+                  <i className="fas fa-sign-out-alt"></i>
+                  <span>Logout</span>
+                </button>
               </div>
             </div>
           ) : (
@@ -191,6 +239,7 @@ const Header = () => {
             onClick={toggleTheme} 
             title="Toggle theme"
             style={{animationDelay: '0.3s'}}
+            aria-label="Toggle dark/light mode"
           >
             <i className="fas fa-moon"></i>
           </button>

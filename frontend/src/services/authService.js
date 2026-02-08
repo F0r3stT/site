@@ -6,23 +6,22 @@ const authService = {
     return res.data;
   },
 
-  // шаг 1: логин (может вернуть токены, а может mfa_required)
   async login(email, password) {
     const res = await api.post("/auth/login", { email, password });
-    return res.data; // важно: axios -> .data
+    return res.data; // всегда токены или ошибка
   },
 
-  // шаг 2: проверить код
-  async verifyLoginCode(challengeId, code) {
-    const res = await api.post("/auth/login/verify", {
+  // ✅ verify/resend теперь для регистрации
+  async verifyRegisterCode(challengeId, code) {
+    const res = await api.post("/auth/register/verify", {
       challenge_id: challengeId,
       code,
     });
     return res.data;
   },
 
-  async resendCode(challengeId) {
-    const res = await api.post("/auth/login/resend", {
+  async resendRegisterCode(challengeId) {
+    const res = await api.post("/auth/register/resend", {
       challenge_id: challengeId,
     });
     return res.data;

@@ -2,13 +2,14 @@
   "name": "pcb-marketplace-react",
   "version": "1.0.0",
   "private": true,
+  "proxy": "http://localhost:8080",
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.5.1",
+    "axios": "^1.6.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.20.0",
-    "axios": "^1.6.2",
     "react-dropzone": "^14.2.3",
-    "@fortawesome/fontawesome-free": "^6.5.1"
+    "react-router-dom": "^6.20.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -16,7 +17,15 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
+  "eslintConfig": {
+  "extends": [
+    "react-app",
+    "react-app/jest",
+    "plugin:react-hooks/recommended"
+  ]
+},
   "devDependencies": {
+    "eslint-plugin-react-hooks": "^7.0.1",
     "react-scripts": "5.0.1"
   },
   "browserslist": {

@@ -1,11 +1,29 @@
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useCallback } from "react";
 import { authService } from "../services/authService";
 
 export const AuthContext = createContext();
 
+function normalizeUser(u) {
+  if (!u) return u;
+
+  const next = { ...u };
+
+  // snake_case -> camelCase
+  if (next.first_name && !next.firstName) next.firstName = next.first_name;
+  if (next.last_name && !next.lastName) next.lastName = next.last_name;
+  if (next.company_name && !next.companyName) next.companyName = next.company_name;
+
+  // camelCase -> snake_case (чтобы бэку и остальным частям было удобно)
+  if (next.firstName && !next.first_name) next.first_name = next.firstName;
+  if (next.lastName && !next.last_name) next.last_name = next.lastName;
+  if (next.companyName && !next.company_name) next.company_name = next.companyName;
+
+  return next;
+}
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [pendingChallenge, setPendingChallenge] = useState(null); // {challengeId, expiresAt}
+  const [pendingChallenge, setPendingChallenge] = useState(null); // оставлено на будущее
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,7 +38,9 @@ export const AuthProvider = ({ children }) => {
 
     // 1) если есть токен и user — просто поднимем user (интерцептор сам обновит токен на 401)
     if (token && userData) {
-      setUser(JSON.parse(userData));
+      const parsed = normalizeUser(JSON.parse(userData));
+      setUser(parsed);
+      localStorage.setItem("user", JSON.stringify(parsed));
       setLoading(false);
       return;
     }
@@ -31,7 +51,9 @@ export const AuthProvider = ({ children }) => {
         const data = await authService.refresh(refreshToken); // {access_token, ...}
         if (data?.access_token) {
           localStorage.setItem("token", data.access_token);
-          setUser(JSON.parse(userData));
+          const parsed = normalizeUser(JSON.parse(userData));
+          setUser(parsed);
+          localStorage.setItem("user", JSON.stringify(parsed));
         } else {
           logout();
         }
@@ -43,89 +65,76 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   };
 
-  // шаг 1 логина: пароль
+  // ✅ Обновление user в контексте + localStorage (нужно для ProfileSettings)
+  const updateUser = useCallback((patchOrFullUser) => {
+     setUser((prev) => {
+       const merged = normalizeUser({ ...(prev || {}), ...(patchOrFullUser || {}) });
+       localStorage.setItem("user", JSON.stringify(merged));
+       return merged;
+     });
+  }, []);
+
   const login = async (email, password) => {
     try {
       const data = await authService.login(email, password);
 
-      // OTP включен -> бек вернёт mfa_required + challenge_id
-      if (data?.mfa_required) {
-        const payload = {
-          challengeId: data.challenge_id,
-          expiresAt: data.expires_at,
-        };
-        setPendingChallenge(payload);
-
-        // на всякий случай сохраним, чтобы пережить refresh страницы
-        localStorage.setItem("pending_challenge_id", payload.challengeId);
-
-        return { success: false, mfaRequired: true, ...payload };
+      if (!data?.access_token) {
+        return { success: false, error: data?.error || "Login failed" };
       }
 
-      // OTP выключен -> обычный логин
-      const { user: userData, access_token, refresh_token } = data;
+      const normalized = normalizeUser(data.user);
 
-      localStorage.setItem("token", access_token);
-      localStorage.setItem("refresh_token", refresh_token);
-      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("token", data.access_token);
+      localStorage.setItem("refresh_token", data.refresh_token);
+      localStorage.setItem("user", JSON.stringify(normalized));
 
-      setUser(userData);
-      setPendingChallenge(null);
-      localStorage.removeItem("pending_challenge_id");
-
+      setUser(normalized);
       return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.error || "Login failed",
-      };
+    } catch (e) {
+      return { success: false, error: e?.response?.data?.error || "Login failed" };
     }
   };
 
-  // шаг 2 логина: код
-  const verifyLoginCode = async (challengeId, code) => {
+  const verifyRegisterCode = async (challengeId, code) => {
     try {
-      const data = await authService.verifyLoginCode(challengeId, code);
-      const { user: userData, access_token, refresh_token } = data;
+      const data = await authService.verifyRegisterCode(challengeId, code);
 
-      localStorage.setItem("token", access_token);
-      localStorage.setItem("refresh_token", refresh_token);
-      localStorage.setItem("user", JSON.stringify(userData));
+      const normalized = normalizeUser(data.user);
 
-      setUser(userData);
-      setPendingChallenge(null);
-      localStorage.removeItem("pending_challenge_id");
+      localStorage.setItem("token", data.access_token);
+      localStorage.setItem("refresh_token", data.refresh_token);
+      localStorage.setItem("user", JSON.stringify(normalized));
+
+      localStorage.removeItem("pending_register_challenge_id");
+      setUser(normalized);
 
       return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.error || "Invalid code",
-      };
+    } catch {
+      return { success: false, error: "Invalid or expired code" };
     }
   };
 
-  const resendLoginCode = async (challengeId) => {
+  const resendRegisterCode = async (challengeId) => {
     try {
-      await authService.resendCode(challengeId);
+      await authService.resendRegisterCode(challengeId);
       return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.error || "Resend failed",
-      };
+    } catch {
+      return { success: false, error: "Failed to resend" };
     }
   };
 
-  const register = async (userData) => {
+  const register = async (payload) => {
     try {
-      const data = await authService.register(userData);
-      return { success: true, data };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.error || "Registration failed",
-      };
+      const data = await authService.register(payload);
+
+      if (data?.verify_required) {
+        localStorage.setItem("pending_register_challenge_id", data.challenge_id);
+        return { success: true, verifyRequired: true, challengeId: data.challenge_id };
+      }
+
+      return { success: true, verifyRequired: false };
+    } catch {
+      return { success: false, error: "Registration failed" };
     }
   };
 
@@ -141,6 +150,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("refresh_token");
     localStorage.removeItem("user");
     localStorage.removeItem("pending_challenge_id");
+
     setPendingChallenge(null);
     setUser(null);
   };
@@ -149,12 +159,13 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         user,
-        pendingChallenge,
+        updateUser, // ✅ добавили
         login,
-        verifyLoginCode,
-        resendLoginCode,
         register,
+        verifyRegisterCode,
+        resendRegisterCode,
         logout,
+        pendingChallenge,
         loading,
       }}
     >

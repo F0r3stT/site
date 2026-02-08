@@ -8,13 +8,36 @@ export default function VerifyCode() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { verifyLoginCode, resendLoginCode } = useContext(AuthContext);
+  const { verifyRegisterCode, resendRegisterCode } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
 
   // берем challengeId либо из state, либо из localStorage (на случай обновления страницы)
   const challengeId =
-    location.state?.challengeId || localStorage.getItem("pending_challenge_id");
+  location.state?.challengeId || localStorage.getItem("pending_register_challenge_id");
+
+const onVerify = async (e) => {
+  e.preventDefault();
+  setError("");
+  setLoading(true);
+
+  const result = await verifyRegisterCode(challengeId, code);
+
+  setLoading(false);
+  if (result.success) navigate("/dashboard");
+  else setError(result.error || "Invalid or expired code");
+};
+
+const onResend = async () => {
+  setError("");
+  const result = await resendRegisterCode(challengeId);
+
+  if (!result.success) {
+    setError(result.error || "Resend failed");
+    return;
+  }
+  alert("New code sent to your email.");
+};
 
   if (!challengeId) {
     return (
@@ -37,31 +60,6 @@ export default function VerifyCode() {
       </div>
     );
   }
-
-  const onVerify = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    const result = await verifyLoginCode(challengeId, code);
-    setLoading(false);
-
-    if (result.success) {
-      navigate("/dashboard");
-    } else {
-      setError(result.error || "Invalid or expired code");
-    }
-  };
-
-  const onResend = async () => {
-    setError("");
-    const result = await resendLoginCode(challengeId);
-    if (!result.success) {
-      setError(result.error || "Resend failed");
-      return;
-    }
-    alert("New code sent to your email.");
-  };
 
   return (
     <div className="auth-page">

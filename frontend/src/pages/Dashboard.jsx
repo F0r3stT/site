@@ -1,22 +1,20 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { Link } from 'react-router-dom'; // Добавляем этот импорт!
 import { AuthContext } from '../contexts/AuthContext';
 import { orderService } from '../services/orderService';
-import CreateOrderModal from '../components/modals/CreateOrderModal';
 import OrderDetailsModal from '../components/modals/OrderDetailsModal';
-
+import '../styles/dashboard.css'; // Убедитесь, что стили подключены
 
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
-const [showDetails, setShowDetails] = useState(false);
-
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   const [stats, setStats] = useState({
-    active: 5,
-    completed: 24,
-    pending: 3
+    active: 0,
+    completed: 0,
+    pending: 0
   });
 
   useEffect(() => {
@@ -25,62 +23,57 @@ const [showDetails, setShowDetails] = useState(false);
   }, []);
 
   const loadOrders = async () => {
-  try {
-    setLoading(true);
-
-    const data = await orderService.getUserOrders();
-
-    // ✅ гарантируем массив
-    setOrders(Array.isArray(data) ? data : (data?.orders || []));
-
-  } catch (error) {
-    console.error("Failed to load orders:", error);
-    setOrders([]); // fallback
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-  const loadStats = async () => {
     try {
-      const data = await orderService.getOrders();
-        setOrders(Array.isArray(data) ? data : (data.orders || []));
-      setStats(data);
+      setLoading(true);
+      const data = await orderService.getUserOrders();
+      setOrders(Array.isArray(data) ? data : (data?.orders || []));
     } catch (error) {
-      console.error('Failed to load stats:', error);
+      console.error('Failed to load orders:', error);
+      setOrders([]);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleCreateOrder = async (orderData) => {
-  try {
-    const created = await orderService.createOrder(orderData);
-    setShowCreateModal(false);
-    loadOrders();
-    return created;
-  } catch (error) {
-    console.error('Failed to create order:', error);
-    throw error;
-  }
-};
-
+  const loadStats = async () => {
+    try {
+      // ПРЕДПОЛОЖИМ, что есть отдельный метод для статистики
+      const data = await orderService.getStats(); // ← Изменил на getStats()
+      setStats(data || { active: 0, completed: 0, pending: 0 });
+    } catch (error) {
+      console.error('Failed to load stats:', error);
+      // Если метода нет, можно считать из orders
+      const activeOrders = orders.filter(order => 
+        ['pending', 'in_production', 'review'].includes(order.status)
+      ).length;
+      const completedOrders = orders.filter(order => 
+        ['completed', 'shipped'].includes(order.status)
+      ).length;
+      
+      setStats({
+        active: activeOrders,
+        completed: completedOrders,
+        pending: orders.filter(o => o.status === 'pending').length
+      });
+    }
+  };
 
   return (
     <div className="dashboard container">
       <div className="dashboard-header">
         <div className="welcome-section">
           <div className="welcome-content">
-            <h2>Welcome back, {user?.company_name || user?.email?.split('@')[0]}!</h2>
+            <h2>Welcome back, {user?.company_name || user?.email?.split('@')[0] || 'Guest'}!</h2>
             <p>Manage your PCB manufacturing orders and track production progress</p>
           </div>
           <div className="welcome-stats">
             <div className="stat-badge">
               <i className="fas fa-clock"></i>
-              <span>{stats.active} Active</span>
+              <span>{stats.active || 0} Active</span>
             </div>
             <div className="stat-badge">
               <i className="fas fa-check-circle"></i>
-              <span>{stats.completed} Completed</span>
+              <span>{stats.completed || 0} Completed</span>
             </div>
           </div>
         </div>
@@ -88,9 +81,9 @@ const [showDetails, setShowDetails] = useState(false);
         <div className="section-header">
           <h3>My Orders</h3>
           <div className="section-actions">
-            <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
+            <Link to="/create-order" className="btn btn-primary">
               <i className="fas fa-plus"></i> New Order
-            </button>
+            </Link>
           </div>
         </div>
       </div>
@@ -102,12 +95,14 @@ const [showDetails, setShowDetails] = useState(false);
         </div>
       ) : orders.length === 0 ? (
         <div className="empty-state">
-          <i className="fas fa-inbox"></i>
+          <div className="empty-icon">
+            <i className="fas fa-inbox"></i>
+          </div>
           <h4>No orders yet</h4>
           <p>Start your first PCB manufacturing order</p>
-          <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
+          <Link to="/create-order" className="btn btn-primary">
             <i className="fas fa-plus"></i> Create First Order
-          </button>
+          </Link>
         </div>
       ) : (
         <div className="orders-container">
@@ -116,7 +111,11 @@ const [showDetails, setShowDetails] = useState(false);
               <div className="order-header">
                 <div className="order-badge status-production">
                   <i className="fas fa-industry"></i>
-                  In Production
+                  {order.status === 'pending' ? 'Pending' :
+                   order.status === 'in_production' ? 'In Production' :
+                   order.status === 'review' ? 'Review' :
+                   order.status === 'completed' ? 'Completed' :
+                   order.status === 'shipped' ? 'Shipped' : 'Draft'}
                 </div>
                 <div className="order-actions">
                   <button className="action-btn">
@@ -140,23 +139,22 @@ const [showDetails, setShowDetails] = useState(false);
               </div>
               <div className="order-footer">
                 <button
-      className="view-order-btn"
-      onClick={() => {
-        setSelectedOrder(order);
-        setShowDetails(true);
-      }}
-    >
-      <i className="fas fa-external-link-alt"></i>
-      View Details
-    </button>
-
+                  className="view-order-btn"
+                  onClick={() => {
+                    setSelectedOrder(order);
+                    setShowDetails(true);
+                  }}
+                >
+                  <i className="fas fa-external-link-alt"></i>
+                  View Details
+                </button>
               </div>
             </div>
           ))}
         </div>
       )}
 
-            {showDetails && (
+      {showDetails && selectedOrder && (
         <OrderDetailsModal
           order={selectedOrder}
           onClose={() => {

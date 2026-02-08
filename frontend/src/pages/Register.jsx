@@ -47,6 +47,16 @@ const Register = () => {
     try {
       const result = await register(formData);
 
+      if (result.success && result.verifyRequired) {
+        navigate("/verify-code", { state: { challengeId: result.challengeId } });
+        return;
+      }
+
+      if (result.success) {
+        navigate("/login");
+        return;
+      }
+
       if (result.success) {
         // авто-логин после регистрации (чтобы backend отправил OTP)
         const loginResult = await login(formData.email, formData.password);
